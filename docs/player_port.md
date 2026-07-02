@@ -5,6 +5,8 @@ Sibling of `oot3d-decomp/docs/player_port.md`. Goal: recover MM3D's `Player_Upda
 Link into the shared OoT/MM Link behavior module — *not* graft the N64 MM (2S2H) logic onto 3DS
 assets.
 
+## Status (2026-07-02, later): anchor `0x001f5e88` = **`Player_Init`** — pinned by structural alignment against MM N64 `z_player.c` (`Player_Init` @ line 11257). See "Role pinned" section below.
+
 ## Status (2026-07-02): BLOCKED at anchor identification — one z_player TU function verified, role TBD
 
 MM3D's `.code` is stripped (no symbols, no RTTI names, no OTF debug tables) and — crucially —
@@ -80,6 +82,87 @@ Not yet documented (MM-specific quirks to look for once Player_Update is anchore
   funcs and skeleton selection — a real divergence from OoT3D that WILL surface in Update.
 - Two-day cycle / owl-save save-state hooks in Player_Update.
 - MM's playtime / clockdown side effects in the update chain.
+
+## Role pinned (2026-07-02): `FUN_001f5e88` = `Player_Init`
+
+Structural diff of `build/decomp/fn_0x001f5e88.c` against MM N64
+`Shipwright/mm/src/overlays/actors/ovl_player_actor/z_player.c` `Player_Init` (line 11257)
+yields a **multi-point, unambiguous match**. Every distinctive shape lines up. Evidence:
+
+1. **Play-struct handler install block (smoking gun).** The very first thing MM's `Player_Init`
+   does is install 13 function pointers into the `PlayState` at consecutive offsets
+   (`play->playerInit`, `play->playerUpdate`, `play->unk_18770`, `play->startPlayerFishing`,
+   `play->grabPlayer`, `play->tryPlayerCsAction`, `play->func_18780`, `play->damagePlayer`,
+   `play->talkWithPlayer`, `play->unk_1878C`, `play->unk_18790`, `play->unk_18794`,
+   `play->setPlayerTalkAnim`). The decomp opens with **exactly** this — 13 consecutive
+   `*(undefined4 *)(param_2 + 0xc42c..0xc45c) = DAT_...` writes, each `DAT_` being a code
+   pointer literal. No other Player TU function does this; only `Player_Init` installs the
+   play-level handlers.
+2. **`gActorOverlayTable[ACTOR_PLAYER].profile->objectId = GAMEPLAY_KEEP;`.** Decomp:
+   `*(undefined2 *)(*(int *)(DAT_001f62c0 + 0x14) + 8) = 1;` — indirect through
+   `gActorOverlayTable` (`DAT_001f62c0`), `+0x14` = `.profile`, `+8` = `objectId`, value `1`
+   = `GAMEPLAY_KEEP`. Matches exactly.
+3. **`this->actor.room = -1; this->csId = CS_ID_NONE;`.** Decomp:
+   `*(undefined *)((int)param_1 + 3) = 0xff; *(undefined *)(param_1 + 0x8ee7) = 0xff;` —
+   both are `-1` writes to Player struct.
+4. **Effect_Add trio (3 blures + 1 tire mark).** MM `Player_Init` calls:
+   ```c
+   Effect_Add(play, &this->meleeWeaponEffectIndex[0], EFFECT_BLURE2, 0, 0, &D_8085D30C);
+   Effect_Add(play, &this->meleeWeaponEffectIndex[1], EFFECT_BLURE2, 0, 0, &D_8085D30C);
+   Effect_Add(play, &this->meleeWeaponEffectIndex[2], EFFECT_TIRE_MARK, 0, 0, &D_8085D330);
+   ```
+   Decomp has three back-to-back calls with signature
+   `FUN_00238138(param_2, param_1+0x704/0x706/0x708, 2/2/4, 0, 0, initPtr)` — the first two
+   `kind=2` = `EFFECT_BLURE2`, last `kind=4` = `EFFECT_TIRE_MARK`, and effectIndex slots at
+   `+0x704/+0x706/+0x708` are three consecutive `s16` — matches `meleeWeaponEffectIndex[3]`.
+5. **`respawnFlag` dispatch.** Late in `Player_Init`:
+   ```c
+   respawnFlag = gSaveContext.respawnFlag;
+   if (respawnFlag != 0) {
+     if (respawnFlag == -3) { ... }
+     else { if ((respawnFlag == 1) || (respawnFlag == -1)) { ... }
+            if (respawnFlag != -7) {
+              if ((respawnFlag == -8) || (respawnFlag == -5) || (respawnFlag == -4)) respawnFlag = 1;
+              if ((respawnFlag < 0) && (respawnFlag != -1) && (respawnFlag != -6)) ...
+   ```
+   Decomp reproduces exactly the same case ladder over the same magic constants
+   (`iVar16 == -3`, `== 1`, `== -1`, `== -7`, `== -8`, `== -5`, `== -4`, `== -6`),
+   with `iVar16 = *(int *)(iVar12 + 0x13624)` = `gSaveContext.respawnFlag`.
+6. **Init-time SkelAnime slot table.** The `do { ... FUN_00203c40(param_1, param_2, 1,
+   aiStack_120[iVar8*2+1], 1); ... } while (iVar8 < 0x1c);` loop iterates 28 entries of a
+   local table copied from `DAT_001f6988` — matches `Player_InitCommon` / init-chain-shape
+   preload of the 28-ish PlayerAnim entries (`gPlayerAnim_link_*` table). Called BEFORE the
+   respawn dispatch = init-time, not per-frame.
+7. **Size and control-flow shape.** 4672 B, dozens of struct field default-value writes at
+   the top, single-shot ("no while(1) action-func dispatch"), no per-frame timer decrement
+   block — categorically not `Player_Update`/`Player_UpdateCommon`. And no `Matrix_Push` /
+   `POLY_OPA_DISP` / `SkelAnime_Draw` calls → not `Player_Draw`.
+
+**Conclusion:** `FUN_001f5e88` at VA `0x001f5e88` is MM3D's `Player_Init(Actor* thisx,
+PlayState* play)`. Signature Ghidra inferred (`short *param_1, int param_2`) matches
+(`Actor*` first, `PlayState*` second — same as N64).
+
+### Fan-out enabled by this anchor
+
+Callees of `Player_Init` are now candidates for identification:
+
+- `FUN_00203c40(this, play, 1, animId, 1)` — called 28+1 times, all with same
+  `(this, play, 1, ..., 1)` shape → very likely `Player_SpawnMagicSparkles` or the anim
+  DMA-request wrapper (`Player_InitAnim` / `func_80834140`-shape). Small utility.
+- `FUN_00238138(play, s16*, kind, 0, 0, initPtr)` — three-args-then-init shape called with
+  `EFFECT_BLURE2` / `EFFECT_TIRE_MARK` literals → this IS `Effect_Add`.
+- `FUN_001d30f8(play, this, someTable, 0)` — table-driven per-instance init → strong
+  candidate for `Actor_ProcessInitChain`.
+- `FUN_00207b60(play)` — no-args-but-play, called from the fresh-init branch → candidate
+  for `Player_InitCommon` (called by `Player_Init` on fresh spawn) or `Play_AssignPlayerCsIdsFromScene`.
+- `FUN_001f57dc(play + 0x9438, formIdx)` — called with a per-form index from a small table
+  → candidate for one of the object-slot lookup helpers (`Object_GetSlot`-shape).
+- `FUN_0022a6d8(this)` — tail-called after a negative return → `Actor_Kill(&this->actor)`
+  candidate (matches `Player_Init` line 11290 `if (objectSlot <= OBJECT_SLOT_NONE) { Actor_Kill(...); return; }`).
+
+Next session should verify at least `FUN_0022a6d8 = Actor_Kill` (small, distinctive: flips
+one flag on the actor and appends to a free list) and `FUN_00238138 = Effect_Add` — both
+are low-risk, high-fanout wins that unlock hundreds of downstream calls across the binary.
 
 ## Artifacts committed by this session
 
