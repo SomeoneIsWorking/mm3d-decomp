@@ -5,6 +5,8 @@ Sibling of `oot3d-decomp/docs/player_port.md`. Goal: recover MM3D's `Player_Upda
 Link into the shared OoT/MM Link behavior module — *not* graft the N64 MM (2S2H) logic onto 3DS
 assets.
 
+## Status (2026-07-02, later3): **`Player_Update` = VA `0x00204640`**, **`Player_Init` = VA `0x001f5e88`**. Handler-pointer table read directly from the Player_Init body. See "Player_Update pinned via handler-install table" section.
+
 ## Status (2026-07-02, later): anchor `0x001f5e88` = **`Player_Init`** — pinned by structural alignment against MM N64 `z_player.c` (`Player_Init` @ line 11257). See "Role pinned" section below.
 
 ## Status (2026-07-02): BLOCKED at anchor identification — one z_player TU function verified, role TBD
@@ -182,3 +184,69 @@ MM3D_FORCE=1 MM3D_TARGETS=0x1f5e88 \
     -process mm3d.code -noanalysis \
     -scriptPath tools -postScript FindPlayerUpdate.py
 ```
+
+## Player_Update pinned via handler-install table (2026-07-02, later3)
+
+`FUN_001f5e88` (Player_Init) opens with 13 consecutive `*(u32*)(param_2 + N) = DAT_00X`
+writes at N = 0xc42c..0xc45c (MM z_player.c installs `play->playerInit`, `playerUpdate`,
+`unk_18770`, `startPlayerFishing`, `grabPlayer`, `tryPlayerCsAction`, `func_18780`,
+`damagePlayer`, `talkWithPlayer`, `unk_1878C`, `unk_18790`, `unk_18794`, `setPlayerTalkAnim`).
+Each `DAT_` in that block is a 32-bit ARM function pointer literal — dereferencing the
+binary at those addresses gives the handler VAs directly.
+
+Extracted (thumb bit stripped; all 0 = ARM mode):
+
+| play offset | field                | DAT literal | Function VA    |
+|-------------|----------------------|-------------|----------------|
+| +0xc42c     | playerInit           | DAT_001f628c | **0x0020447c** |
+| +0xc430     | **playerUpdate**     | DAT_001f6290 | **0x00204640** |
+| +0xc434     | unk_18770            | DAT_001f6294 | 0x002084fc     |
+| +0xc438     | startPlayerFishing   | DAT_001f6298 | 0x0020364c     |
+| +0xc43c     | grabPlayer           | DAT_001f629c | 0x00209494     |
+| +0xc440     | tryPlayerCsAction    | DAT_001f62a0 | 0x0022b728     |
+| +0xc448     | damagePlayer         | DAT_001f62a8 | 0x0020f954     |
+| +0xc44c     | talkWithPlayer       | DAT_001f62ac | 0x002209a8     |
+
+### Reconciliation with prior ruled-outs
+
+`FUN_00204640` (12508 B) was previously RULED OUT as `Player_UpdateCommon` because
+`ReferenceManager` returned zero refs. That result was a true positive for
+"reached only via function pointer" (matching a `play->playerUpdate` slot install)
+and a false negative for identity. It is `Player_Update`. Re-verifying its
+per-frame timer-decrement / stateFlags-test / actionFunc-dispatch shape is the next
+sanity-check but the derivation via handler pointer is direct and unambiguous.
+
+**Note on the two "Init" callbacks.** Actor overlay `.profile.init` (`Player_Init`
+proper, the entry point Actor_Init_Player calls) is `FUN_001f5e88`. The
+`play->playerInit` callback slot (+0xc42c) is a DIFFERENT function (`FUN_0020447c`)
+— MM boots this once and calls it from elsewhere in scene setup (probably
+`Player_InitCommon`-shape; N64 `PlayState.playerInit` in z64play.h is a callback,
+not `Player_Init`). Do not conflate.
+
+### Extraction one-liner (reproducible)
+
+```bash
+python3 -c "
+import struct
+with open('$SCRATCH/mm3d-decomp/mm3d.code','rb') as f: data=f.read()
+def rd(va): off=va-0x100000; return struct.unpack('<I', data[off:off+4])[0]
+for name, va in [('playerInit',0x1f628c),('playerUpdate',0x1f6290)]:
+    print(f'{name:22s} DAT_{va:08x} -> VA 0x{rd(va) & ~1:08x}')
+"
+```
+
+### Next-session targets (documented, not verified this run)
+
+- **`Player_Draw` = ?** — Not in the `play->` handler table (Player_Draw is dispatched
+  via the actor overlay profile like Player_Init). Recovery: read the `gActorOverlayTable`
+  entry for `ACTOR_PLAYER`. Player_Init reads it as `DAT_001f62c0 + 0x14` (profile) —
+  the profile struct's `draw` field lives at profile+0x1c on N64 (see soh z64actor.h
+  `ActorProfile`). Read that pointer and Player_Draw's VA falls out the same way as
+  Player_Update did. Do NOT scan for symbol strings — none survive.
+- **Verify `FUN_00204640` shape** — decompile at high effort, confirm the top-of-body
+  has the standard Player-Update prologue (state flag test, timer decrement, camera
+  update hook), and confirm the actionFunc dispatch appears (probably calls
+  `Player_UpdateCommon` which does the real dispatch).
+- **Player_Draw's callees will fan out** the `SkelAnime_DrawFlex` + `Matrix_Push` +
+  MM-specific `Player_DrawGameplay` variant. Those are the crucial ones for the
+  soh3d MM Link render port.
