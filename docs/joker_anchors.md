@@ -81,6 +81,42 @@ mesh is modelling a different architecture. Combined with the split asset layout
 textures, per-scene `.gar` holding only a CMAB), the room CMB is one input to a scene-graph node, not a
 standalone drawable.
 
+## FUN_005e1994 — CMB model instantiation (reached from z_room.cpp -> ctor vtable[0])
+
+Chain: `z_room.cpp` assert `0x006465C0` -> `FUN_004dd3f0` (allocates a 0x4c node, ctor `FUN_00140678`
+sets vtable `0x0063ba5c`) -> vtable[0] = **`FUN_005e1994`**, called with the CMB base.
+
+It sizes its runtime allocation straight from the CMB header's chunk counts, confirming the header
+layout our port uses (for version >= 7):
+
+    *(cmb+0x20)              index COUNT
+    *(cmb+0x28) qtrs   *(cmb+0x2C) mats   *(cmb+0x30) tex   *(cmb+0x34) sklm
+    *(cmb+0x3C) vatr   *(cmb+0x40) INDEX BUFFER   *(cmb+0x44) TEXTURE DATA
+
+    alloc = tex_count*4 + mat_count*0xC + sklm_count*0x10 + f(qtrs)*0xA0 + 0xE8
+
+Texture data is fetched as `cmb + *(cmb+0x44) + texEntry[4]`, i.e. per-texture offsets into a shared
+blob at +0x44 — matching `mTexdataPtr`. **Our header pointer assignments are CORRECT**; the earlier
+suspicion that `mIdxPtr`/`mTexdataPtr` were mis-shifted for MM3D is DISPROVEN.
+
+### Discrepancy worth chasing: index element size
+
+The engine uploads the index buffer as a single flat array sized `*(cmb+0x20) << 1` — i.e. **all
+indices are u16**, uniformly, for the whole CMB:
+
+    piVar2 = cmb + *(cmb+0x40);           // index buffer base
+    FUN_00131cc8(heap, buf, *(cmb+0x20) << 1);
+
+Our parser instead derives the element size PER PRM and scales `prm.first` by it:
+
+    int isz = dtSize(prm.index_type);
+    size_t ibase = mIdxPtr + (size_t)prm.first * isz;
+
+If an MM3D `prm.index_type` is anything other than a 2-byte type, `prm.first` is scaled by the wrong
+stride, indices come out of the wrong place, and every attribute read overruns at the same index —
+exactly the observed failure. NOT yet confirmed: read the actual `index_type` values out of the MM3D
+room CMB and compare with OoT3D before changing anything.
+
 ## Open question this was opened for
 
 Why MM3D room CMB vertex indices overrun every VATR buffer (see
