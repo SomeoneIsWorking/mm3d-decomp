@@ -99,7 +99,7 @@ Texture data is fetched as `cmb + *(cmb+0x44) + texEntry[4]`, i.e. per-texture o
 blob at +0x44 — matching `mTexdataPtr`. **Our header pointer assignments are CORRECT**; the earlier
 suspicion that `mIdxPtr`/`mTexdataPtr` were mis-shifted for MM3D is DISPROVEN.
 
-### Discrepancy worth chasing: index element size
+### RESOLVED — this discrepancy WAS the bug (index offset is in u16 slots)
 
 The engine uploads the index buffer as a single flat array sized `*(cmb+0x20) << 1` — i.e. **all
 indices are u16**, uniformly, for the whole CMB:
@@ -112,10 +112,15 @@ Our parser instead derives the element size PER PRM and scales `prm.first` by it
     int isz = dtSize(prm.index_type);
     size_t ibase = mIdxPtr + (size_t)prm.first * isz;
 
-If an MM3D `prm.index_type` is anything other than a 2-byte type, `prm.first` is scaled by the wrong
-stride, indices come out of the wrong place, and every attribute read overruns at the same index —
-exactly the observed failure. NOT yet confirmed: read the actual `index_type` values out of the MM3D
-room CMB and compare with OoT3D before changing anything.
+CONFIRMED. `prm.first` indexes **u16 slots**, so the byte offset is `first * 2` ALWAYS — the element is
+still read at its declared width. MM3D room CMBs do carry UBYTE prms (OoT3D's are all USHORT, which is
+why `first*2 == first*dtSize` there and the wrong model never surfaced). Fixed in
+`Shipwright/cmb3d/asset/cmb.cpp`; corroborated by noclip's `OcarinaOfTime3D/cmb.ts`
+(`prm.offset = getUint16(0x16) * 2`). Details + verification in
+`debug_journal/2026-07-21-mm-scene-room-pipeline.md`.
+
+NOTE: the engine allocating `index_count << 1` does NOT mean every index is READ as u16 — that mistake
+(forcing uniform u16 reads) was tried and made things strictly worse.
 
 ## Load-path call chain (walked; index math is NOT here)
 
@@ -136,9 +141,9 @@ index/vertex math happens at DRAW/submission time in the node, so the remaining 
 answered from the node's draw virtual (not vtable[0]) or the GPU submission layer — walking further
 down the load path will not find it.
 
-## Open question this was opened for
+## The question this was opened for — ANSWERED
 
-Why MM3D room CMB vertex indices overrun every VATR buffer (see
-`debug_journal/2026-07-21-mm-scene-room-pipeline.md`). NOT yet answered. Next step: walk from
-`FUN_004dd3f0` / `FUN_004938d8` to the node type that consumes room geometry, and read how it computes
-the vertex fetch.
+Why MM3D room CMB vertex indices overrun every VATR buffer: the index-region offset is in u16 slots
+(`first * 2`), not bytes-by-element-size. See the section above. Room geometry now renders upright and
+correctly positioned; the remaining MM scene gap is missing GROUND geometry, which is a separate
+draw-state question, not an index-math one.
