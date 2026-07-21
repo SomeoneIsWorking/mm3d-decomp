@@ -17,7 +17,14 @@ No crypto here — decrypted dumps only.
 import argparse, os, struct, sys
 
 # Reuse the soh3d NCCH/ExeFS parser (locates exefs/exheader offsets).
-SOH3D_TOOLS = os.path.expanduser("<engine>/tools")
+# Resolve the engine tools dir (ctr_romfs.py) WITHOUT a machine-specific path: mm3d-decomp is
+# vendored as a submodule of the zelda3d engine repo, so tools/ sits two levels up. ZELDA3D_TOOLS
+# overrides for a standalone checkout.
+SOH3D_TOOLS = os.environ.get(
+    "ZELDA3D_TOOLS",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "tools"))
+if not os.path.isdir(SOH3D_TOOLS):
+    sys.exit("engine tools dir not found: %s (set ZELDA3D_TOOLS)" % SOH3D_TOOLS)
 sys.path.insert(0, SOH3D_TOOLS)
 import ctr_romfs as C
 
