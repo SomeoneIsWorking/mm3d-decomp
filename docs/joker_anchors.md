@@ -117,6 +117,25 @@ stride, indices come out of the wrong place, and every attribute read overruns a
 exactly the observed failure. NOT yet confirmed: read the actual `index_type` values out of the MM3D
 room CMB and compare with OoT3D before changing anything.
 
+## Load-path call chain (walked; index math is NOT here)
+
+    FUN_004dd3f0      z_room.cpp — allocates the 0x4c node, ctor FUN_00140678 (vtable 0x0063ba5c)
+      vtable[0] = FUN_005e1994    CMB model setup; sizes allocation from chunk counts
+        FUN_005e1f84              sklm (cmb+0x34) setup
+          FUN_005e2380            per-MESH construction
+
+Confirmations of our parser along the way: material stride **0x16C** for v>=7 (`iVar1 * 0x16c`), mesh
+count at `chunk+8` with **0xC** stride, texture data fetched as `cmb + *(cmb+0x44) + texEntry[4]`.
+
+`FUN_005e1f84` computes a **prefix sum** of the eight words at `0x2C..0x48` of a descriptor into slots
+[3..10] — i.e. it derives base offsets by ACCUMULATING sizes. Worth revisiting if the index-layout
+question turns out to hinge on accumulated bases.
+
+**This entire chain is load-time CONSTRUCTION.** None of it fetches vertices or indices. The
+index/vertex math happens at DRAW/submission time in the node, so the remaining question must be
+answered from the node's draw virtual (not vtable[0]) or the GPU submission layer — walking further
+down the load path will not find it.
+
 ## Open question this was opened for
 
 Why MM3D room CMB vertex indices overrun every VATR buffer (see
