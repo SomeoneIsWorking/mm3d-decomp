@@ -9,9 +9,19 @@ from ghidra.util.task import ConsoleTaskMonitor
 from ghidra.app.cmd.function import CreateFunctionCmd
 from ghidra.app.cmd.disassemble import ArmDisassembleCommand
 
-OUT = "<SOH3D_REPO>/scratch/mm3d-decomp/build/decomp"
-if not os.path.isdir(OUT):
-    os.makedirs(OUT)
+# Output dir: $MM3D_DECOMP_OUT, else <repo>/build/decomp via $ZELDA3D_REPO.
+def _out_dir(sub=""):
+    o = os.environ.get("MM3D_DECOMP_OUT")
+    if not o:
+        repo = os.environ.get("ZELDA3D_REPO")
+        if not repo:
+            raise RuntimeError("set MM3D_DECOMP_OUT, or ZELDA3D_REPO to the zelda3d checkout")
+        o = os.path.join(repo, "mm3d-decomp", "build" + sub)
+    if not os.path.isdir(o):
+        os.makedirs(o)
+    return o
+
+OUT = _out_dir('/decomp')
 
 fm = currentProgram.getFunctionManager()
 af = currentProgram.getAddressFactory().getDefaultAddressSpace()
