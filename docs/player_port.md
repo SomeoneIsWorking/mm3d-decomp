@@ -1,7 +1,7 @@
 # Porting MM3D Link's player code — plan & journal
 
 Sibling of `oot3d-decomp/docs/player_port.md`. Goal: recover MM3D's `Player_Update` /
-`Player_Draw` (and the surrounding action-func machinery) as ground truth so soh3d can port MM
+`Player_Draw` (and the surrounding action-func machinery) as ground truth so zelda3d can port MM
 Link into the shared OoT/MM Link behavior module — *not* graft the N64 MM (2S2H) logic onto 3DS
 assets.
 
@@ -249,4 +249,4 @@ for name, va in [('playerInit',0x1f628c),('playerUpdate',0x1f6290)]:
   `Player_UpdateCommon` which does the real dispatch).
 - **Player_Draw's callees will fan out** the `SkelAnime_DrawFlex` + `Matrix_Push` +
   MM-specific `Player_DrawGameplay` variant. Those are the crucial ones for the
-  soh3d MM Link render port.
+  zelda3d MM Link render port.

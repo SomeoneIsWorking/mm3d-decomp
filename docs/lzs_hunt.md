@@ -2,7 +2,7 @@
 
 **Resolution**: found via web search. `xdanieldzd/Scarlet.IO.CompressionFormats/GrezzoLZS.cs`
 has the exact algorithm. See `docs/formats/lzs.md` for the format, and
-`soh3d/Shipwright/cmb3d/asset/lzs.{h,cpp}` for the port. Verified against real MM3D
+`Shipwright/cmb3d/asset/lzs.{h,cpp}` (in the superproject) for the port. Verified against real MM3D
 archives (`zelda2_boj` 148907 → 217088 bytes, `zelda2_box` 90642 → 135200 bytes, both
 producing valid GAR2 headers).
 

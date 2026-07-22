@@ -55,11 +55,11 @@ The break came from a web search: `xdanieldzd/Scarlet` (Scarlet.IO.CompressionFo
 GrezzoLZS.cs) already had the exact decoder. Cross-referenced against a Python port
 of that algorithm running on real archives (`zelda2_boj`, `zelda2_box`) — both produced
 a valid `GAR\2` header at the expected uncompressed size. Ported to
-`soh3d/Shipwright/cmb3d/asset/lzs.{h,cpp}` and wired into the MM3D actor-archive path.
+`Shipwright/cmb3d/asset/lzs.{h,cpp}` and wired into the MM3D actor-archive path.
 
 ## Related archive formats
 - **GAR2** (raw): sibling `.gar.lzs` files (magic `GAR\2`) — parsed by
-  `soh3d/Shipwright/cmb3d/asset/gar.cpp`.
+  `Shipwright/cmb3d/asset/gar.cpp`.
 - **ZAR** (OoT3D): older Grezzo archive format used by OoT3D, structurally similar to GAR2
   but with a smaller 0x18 header.
 
