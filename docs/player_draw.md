@@ -69,6 +69,8 @@ functions confirm the pointer roles: `FUN_00201074` consumes `+0x210`,
 | `+0x070` | `actor.speed` | right-hand open-to-closed override compares its IEEE-754 bits with `0x40000000` (`2.0f`) |
 | `+0x1f8` | `currentShield` | signed byte, indexes the two-entry shield table after subtracting one |
 | `+0x1f9` | `currentBoots` | signed byte, compared with `5`, exactly `PLAYER_BOOTS_ZORA_UNDERWATER` |
+| `+0x1fb` | `heldItemAction` | bottle-content fallback, accepted only in the exact `0x15..0x2b` bottle-action range |
+| `+0x1fe` | `itemAction` | primary bottle-content action and the final Deku-stick test (`7`) |
 | `+0x1ff` | `transformation` | indexes all five-form tables in retail enum order |
 | `+0x208` | `leftHandType` | indexes `PlayerModelType`; consumed by the left-hand selector |
 | `+0x209` | `rightHandType` | compared with `9`, exactly `PLAYER_MODELTYPE_RH_BOW` |
@@ -77,9 +79,14 @@ functions confirm the pointer roles: `FUN_00201074` consumes `+0x210`,
 | `+0x210` | `rightHandDLists` | default per-form right-hand mesh-table pointer |
 | `+0x214` | `leftHandDLists` | default per-form left-hand mesh-table pointer |
 | `+0x218` | `sheathDLists` | default per-form sheath mesh-table pointer |
-| `+0x370` | `skelAnime.animation` identity | Deku drink special case compares the current animation with IDs `0x26b` and `0x26c` |
-| `+0x11db0` | `stateFlags1` | right-hand selector tests `0x2`, `0x400`, `0x800`, and `0x08000000` |
+| `+0x370` | `skelAnime.animation` identity | both hand selectors compare exact retail animation IDs |
+| `+0x37c` | `skelAnime.curFrame` | bottle in/out thresholds `12.0f`/`36.0f` and Zora guitar threshold `6.0f` |
+| `+0x380` | `skelAnime.endFrame` | sign selects the direction of the bottle item-change threshold |
+| `+0xe14` | `actionFunc` | Bremen-march and ExchangeItem callback identities |
+| `+0x11db0` | `stateFlags1` | hand selectors consume typed movement, swim, carry, and Zora-boomerang flags |
+| `+0x11db8` | `stateFlags3` | Deku-stick group 27 is hidden while bit `0x04000000` is set |
 | `+0x11e20` | `upperActionFunc` | Giant's Mask open hand compares this callback with `FUN_001ef758` |
+| `+0x129bc` bit 16 | MM3D-private transient render flag | forces the open left hand; set by mount-transition and two actor-contact functions, with no exact typed 2S2H field yet |
 
 The save value used by the Human sheath override is also aligned. At
 `0x0020d18c..0x0020d1c4`, retail reads the equipment halfword at save offset
@@ -230,6 +237,105 @@ separately from `rightHandType`; this preserves states such as
 previous right-hand table. Its single selected mesh is additive to the base and
 sheath masks.
 
+## Left-hand, sword, and bottle selector
+
+`FUN_00211aa4(Player*, animationLeftHandOverride)` spans
+`0x00211aa4..0x00211f8c`. Its literal pools and the helper it calls identify the
+visibility inputs without texture inference:
+
+| literal VA | value | role |
+|---:|---:|---|
+| `0x00211dcc` | `0x006269c4` | 23 bottle-content transform records, 16 bytes each |
+| `0x00211dd4` | `0x00626b34` | form-indexed bottle hand mesh table |
+| `0x00211dd8` | `0x007751d8` | save context used for button-item validation |
+| `0x00211ddc` | `0x001ff52c` | ExchangeItem action callback |
+| `0x00211de0` | `0x00626b48` | form limb indices used by the bottle transform call |
+| `0x00211de4` | `36.0f` | bottle-out visibility threshold; subtracting `0x00d00000` produces `12.0f` |
+| `0x00211de8` | `0x0000026b` | first of the three Deku drink animation IDs |
+| `0x00211dec` | `0x00691348` | form-indexed bottle-content mesh table |
+| `0x00211fac` | `0x006919bc` | live draw state (`+0x78` LOD, `+0x7c` form, `+0x80` left-hand type) |
+| `0x00211fb0` | `0x00691250` | form-indexed open-hand table |
+| `0x00211fb8` | `0x00691280` | form-indexed closed-hand table |
+| `0x00211fbc` | `0x001eff18` | Bremen-march action callback |
+| `0x00211fc0` | `0x00691a5c` | animation left-hand override pointer table |
+| `0x00211fc4` | `0x00000402` | `PLAYER_STATE1_2 | PLAYER_STATE1_400` |
+| `0x00211fcc` | `0x00691278` | Zora guitar pair, mesh 10 in both LODs |
+| `0x00211fd0` | `0x001ef758` | carry upper-action callback |
+
+The exact duplicate-LOD mesh tables, in Fierce Deity/Goron/Zora/Deku/Human
+form order, are:
+
+```text
+open:            2, 2, 1, 1, 21
+closed:          1, 1, 2, 1, 20
+one-hand sword:  8, 2, 2, 1, 12
+two-hand sword:  8, 2, 2, 1, 18
+bottle hand:     6, 8, 8, 6, 0
+bottle contents: 7, 9, 9, 7, 24
+```
+
+`FUN_00219aa0` at `0x00219aa0..0x00219bf0` filters the selected mesh through
+form whitelists at `0x00626950`. Its Human one-hand sword override reads
+`0x0068ee50`, which contains duplicate-LOD mesh pairs `12, 14, 16` for
+Kokiri/Razor/Gilded. Fierce Deity is the only additive hand case: selecting
+mesh 8 also enables mesh 1. The other whitelists are Goron `{1,2,8}`, Zora
+`{1,2,8,10}`, Deku `{1,6}`, and Human `{0,12,14,16,18,19,20,21}`.
+
+In exact branch order, the visibility selector is:
+
+1. Use the bottle route when `leftHandType == LH_BOTTLE`, or while retail
+   animation `0x107` (`boy/anim/link_normal_free2freeB.csab`) remains on the
+   bottle side of marker frame 13. Forward playback uses `curFrame < 13`;
+   reverse playback uses `curFrame > 13`.
+2. Otherwise force open for live left-hand type 4 plus
+   `PLAYER_STATE1_ZORA_BOOMERANG_THROWN`, or MM3D-private render flag
+   `Player+0x129bc` bit 16.
+3. Convert nominal open to closed above speed `2.0f`, except while swimming,
+   carrying an actor, or running `FUN_001eff18`. Decompilation of that callback
+   and the N64 Rosetta behavior identify typed `Player_Action_11` (Bremen
+   march).
+4. Apply the signed linkb override (`-1` none, `0` closed, `1` open).
+5. Zora uses open for state mask `0x402`, or while swimming in boots below
+   `PLAYER_BOOTS_ZORA_UNDERWATER`. Otherwise guitar-start ID `0x2c1` switches
+   to mesh 10 at frame 6, and IDs `0x2c0`, `0x2c2`, and `0x2d3` select mesh 10
+   unconditionally.
+6. Without an earlier override, Giant's Mask uses Fierce Deity open for the
+   carry upper action and Fierce Deity closed otherwise.
+7. Apply the Human sword table only for Human `LH_ONE_HAND_SWORD`, a nonzero
+   sword equip, and no Giant's Mask.
+
+The bottle-content index is `itemAction - 0x15` through `0x2b`. A primary
+action is retained only when one of the four live B/C button items maps back to
+that action, or the action callback is `FUN_001ff52c`; otherwise the selector
+uses `heldItemAction`, then empty index zero. The save checks honor disabled
+button status except under HUD visibility `0x10`, exactly 2S2H
+`HUD_VISIBILITY_A_B_C`. Bottle content is visible after frame 12 for IDs
+`0x5a/0x60` (bug/fish in), before frame 36 for `0x5c/0x62` (bug/fish out),
+hidden for `0x5b/0x5d/0x5e/0x5f/0x61` and Deku drink IDs
+`0x26b..0x26d`, and otherwise visible for a nonempty content index. Finally,
+`itemAction == PLAYER_IA_DEKU_STICK` enables mesh 27 unless stateFlags3 bit
+`0x04000000` is set.
+
+The shared retail GAR independently resolves every numeric animation identity:
+`0x5a..0x62` are the named `boy/anim/link_bottle_*` clips, `0x107` is
+`link_normal_free2freeB`, `0x26b..0x26d` are `nuts/anim/pn_drink{,end,start}`,
+and `0x2c0/0x2c1/0x2c2/0x2d3` are
+`pz_gakkiplay/gakkistart/gakkiwait/gakki_demo`. Exact CMB inventory checks
+also prove that every selected group exists in its form body.
+
+The pure visibility policy is in `mm3d_player_left_hand_policy.{cpp,h}` and
+the narrow typed adapter is `mm3d_player_left_hand.{cpp,h}`. The adapter uses
+the live display-list table pointer independently of `leftHandType`, rejects
+out-of-range linkb indices, and preserves the exact disabled-button rule. The
+selected hand, bottle-content, and Deku-stick groups are additive to the base,
+sheath, and right-hand masks. Two boundaries remain explicit: MM3D's private
+bit-16 transient has no exact typed 2S2H homolog and is currently false in the
+adapter; the 23-record bottle joint-transform stage is separate from mesh
+visibility and is not ported here. The N64 `gPlayerAnim_pz_gakkiplay` and
+`gakkistart` symbols align the live guitar cases, but retail-only
+`pz_gakkiwait` and `pz_gakki_demo` have no independent typed N64 animation
+identity.
+
 ## PlayerModelType mesh corpus
 
 For later hand-selector work, the pointer array at `0x0069159c` maps the typed
@@ -251,10 +357,9 @@ gives rows in form order Fierce Deity, Goron, Zora, Deku, Human:
 | `RH_INSTRUMENT` | `0x006913fc` | `5, 5, 4, 3, 25` |
 | `RH_HOOKSHOT` | `0x00691424` | `5, 5, 4, 3, 9` |
 
-These are default model-group identities only. The complete inlined right-hand
-stage is recovered and ported above. `FUN_00211aa4` still contains independent
-state-, animation-, speed-, and joint-table-driven left-hand overrides; this
-corpus alone does not authorize enabling a left-hand group.
+These are default model-group identities only. The complete right-hand and
+left-hand visibility stages are recovered above; the tables are recorded here
+as cross-checks rather than used without their selector conditions.
 
 ## Retail body inventory
 
@@ -275,12 +380,13 @@ selector group set into a failing static asset gate. The tool requires
 
 ## Remaining draw-policy frontier
 
-The base reset, complete sheath/back-shield stage, and complete right-hand /
-held-equipment stage are ported. The next open stage is `FUN_00211aa4`'s
-left-hand selector. Its default tables are recovered above, but its independent
-animation/state inputs still need complete typed alignment before enabling a
-left hand, sword, or bottle group. Applying another game's mesh map, defaulting
-to all groups, or guessing from texture names is not valid.
+The base reset, sheath/back-shield stage, right-hand/held-equipment stage, and
+left-hand visibility stage are ported from their retail tables and branch
+order. The next left-hand evidence gaps are the MM3D-private transient bit,
+retail-only Zora guitar wait/demo identities, the bottle-content joint
+transforms, and an authentic live equipment/bottle capture. Applying another
+game's mesh map, defaulting to all groups, or guessing from texture names is
+not valid.
 
 ## Port integration evidence
 
