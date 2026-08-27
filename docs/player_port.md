@@ -235,18 +235,15 @@ for name, va in [('playerInit',0x1f628c),('playerUpdate',0x1f6290)]:
 "
 ```
 
-### Next-session targets (documented, not verified this run)
+### Next-session targets
 
-- **`Player_Draw` = ?** — Not in the `play->` handler table (Player_Draw is dispatched
-  via the actor overlay profile like Player_Init). Recovery: read the `gActorOverlayTable`
-  entry for `ACTOR_PLAYER`. Player_Init reads it as `DAT_001f62c0 + 0x14` (profile) —
-  the profile struct's `draw` field lives at profile+0x1c on N64 (see soh z64actor.h
-  `ActorProfile`). Read that pointer and Player_Draw's VA falls out the same way as
-  Player_Update did. Do NOT scan for symbol strings — none survive.
+- **`Player_Draw = 0x001f9038` is now pinned.** The callback installer at `0x001f47ec`
+  writes init/destroy/update/draw directly to `0x006919ac`. Its base mesh reset and
+  exact per-form visibility table are documented in `docs/player_draw.md`.
 - **Verify `FUN_00204640` shape** — decompile at high effort, confirm the top-of-body
   has the standard Player-Update prologue (state flag test, timer decrement, camera
   update hook), and confirm the actionFunc dispatch appears (probably calls
   `Player_UpdateCommon` which does the real dispatch).
-- **Player_Draw's callees will fan out** the `SkelAnime_DrawFlex` + `Matrix_Push` +
-  MM-specific `Player_DrawGameplay` variant. Those are the crucial ones for the
-  zelda3d MM Link render port.
+- **Continue Player draw equipment selection** from `FUN_0020cfa4` and
+  `FUN_00211aa4`: align their static tables and 3DS Player fields to the N64
+  `Player` representation before porting hand/weapon/sheath/shield groups.

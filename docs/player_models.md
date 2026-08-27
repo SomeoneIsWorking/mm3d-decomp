@@ -1,8 +1,8 @@
 # MM3D Player body-model ownership
 
 Ground truth: retail Majora's Mask 3D `CTR-P-AJRE` RomFS, enumerated through the repository's `CtrRom` and GAR2/LzS
-parsers. This records asset identity only; it does not claim that the native Player draw or animation
-dispatcher has been fully decompiled.
+parsers. Native Player draw and base mesh visibility evidence now lives in `player_draw.md`; animation
+dispatch remains only partially recovered.
 
 ## Per-form body CMBs
 
