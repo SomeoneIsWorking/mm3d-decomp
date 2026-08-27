@@ -1,4 +1,4 @@
-# MM3D Player draw and base mesh visibility
+# MM3D Player draw and mesh visibility
 
 Ground truth: retail Majora's Mask 3D `CTR-P-AJRE` `.code`, loaded at
 `0x00100000` as ARM little-endian. The CMB identities and mesh inventories come
@@ -56,6 +56,109 @@ contains mutually exclusive hands, bows, hookshot, three shields, four swords,
 and sheaths. Drawing the whole CMB therefore renders baked variants
 simultaneously rather than a valid Player state.
 
+## Player model-field alignment
+
+The model-selector fields can be aligned without using host struct offsets.
+This local MM3D `Player` window preserves the N64 field order and enum
+semantics while widening its display-list pointers. Three independent selector
+functions confirm the pointer roles: `FUN_00201074` consumes `+0x210`,
+`FUN_00211aa4` consumes `+0x214`, and `FUN_0020cfa4` consumes `+0x218`.
+
+| MM3D `Player` offset | typed 2S2H field | selector evidence |
+|---:|---|---|
+| `+0x1f8` | `currentShield` | signed byte, indexes the two-entry shield table after subtracting one |
+| `+0x1ff` | `transformation` | indexes all five-form tables in retail enum order |
+| `+0x208` | `leftHandType` | indexes `PlayerModelType`; consumed by the left-hand selector |
+| `+0x209` | `rightHandType` | compared with `9`, exactly `PLAYER_MODELTYPE_RH_BOW` |
+| `+0x20a` | `sheathType` | compared with `12`, `14`, and `15`, the typed sheath variants |
+| `+0x20b` | `currentMask` | compared with `0x14`, exactly `PLAYER_MASK_GIANT` |
+| `+0x210` | `rightHandDLists` | default per-form right-hand mesh-table pointer |
+| `+0x214` | `leftHandDLists` | default per-form left-hand mesh-table pointer |
+| `+0x218` | `sheathDLists` | default per-form sheath mesh-table pointer |
+
+The save value used by the Human sheath override is also aligned. At
+`0x0020d18c..0x0020d1c4`, retail reads the equipment halfword at save offset
+`+0x7a`, applies the mask at `0x00626d2c` (`0x000f`) and shift at
+`0x00626d5c` (`0`). These are exactly 2S2H's
+`GET_CUR_EQUIP_VALUE(EQUIP_TYPE_SWORD)` constants.
+
+## Sheath and back-shield selector
+
+The complete sheath-limb stage remains inside `FUN_0020cfa4` after the base
+reset. Its control flow is:
+
+```c
+if (player->currentMask != PLAYER_MASK_GIANT) {
+    if (player->transformation == PLAYER_FORM_HUMAN &&
+        player->currentShield != PLAYER_SHIELD_NONE &&
+        (player->sheathType == PLAYER_MODELTYPE_SHEATH_14 ||
+         player->sheathType == PLAYER_MODELTYPE_SHEATH_15)) {
+        enable(kBackShield[player->currentShield - 1]);
+    }
+
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        sword = GET_CUR_EQUIP_VALUE(EQUIP_TYPE_SWORD);
+        enable((player->sheathType == PLAYER_MODELTYPE_SHEATH_12 ||
+                player->sheathType == PLAYER_MODELTYPE_SHEATH_14)
+                   ? kSheathedSword[sword]
+                   : kEmptySheath[sword]);
+    } else {
+        enable(player->sheathDLists[lod]);
+    }
+}
+```
+
+`enable(-1)` is the absent-slot case. Both retail LOD entries are identical in
+every recovered table, so the port can collapse each pair without losing a
+selector distinction.
+
+The exact table data is:
+
+| table VA | index | mesh IDs |
+|---:|---|---|
+| `0x0069144c` | `SHEATH_12`, forms FD/Goron/Zora/Deku/Human | `-1, -1, -1, 8, 5` |
+| `0x00691474` | `SHEATH_13`, forms FD/Goron/Zora/Deku/Human | `-1, -1, -1, 8, 5` |
+| `0x0069149c` | `SHEATH_14` and `SHEATH_15` | all `-1` |
+| `0x006914c4` | Hero Shield, Mirror Shield | `3, 4` |
+| `0x006914d4` | sword equip None/Kokiri/Razor/Gilded | `-1, 5, 6, 7` |
+| `0x006914f4` | sword equip None/Kokiri/Razor/Gilded | `-1, 13, 15, 17` |
+
+The exact Human CMB inventory independently identifies these groups: mesh 3
+uses only `p_shield_h_00`, mesh 4 only `p_shield_m_00`; meshes 5/6/7 contain
+the corresponding `p_sword_*` and `p_saya_*` textures, while 13/15/17 are the
+three sheath variants. This is an asset corroboration of the binary table, not
+the source of the mesh mapping.
+
+The typed port lives in `mm3d_player_sheath_policy.{cpp,h}` with a narrow
+2S2H adapter in `mm3d_player_sheath.{cpp,h}`. Its result is additive to the
+base mask. Hand/held-weapon selection remains outside this selector.
+
+## PlayerModelType mesh corpus
+
+For later hand-selector work, the pointer array at `0x0069159c` maps the typed
+`PlayerModelType` enum to five-form, two-LOD tables. Collapsing duplicate LODs
+gives rows in form order Fierce Deity, Goron, Zora, Deku, Human:
+
+| type | table VA | mesh IDs |
+|---|---:|---|
+| `LH_OPEN` | `0x00691250` | `2, 2, 1, 1, 21` |
+| `LH_CLOSED` | `0x00691280` | `1, 1, 2, 1, 20` |
+| `LH_ONE_HAND_SWORD` | `0x006912a8` | `8, 2, 2, 1, 12` |
+| `LH_TWO_HAND_SWORD` | `0x006912d0` | `8, 2, 2, 1, 18` |
+| `LH_4` | `0x00691250` | `2, 2, 1, 1, 21` |
+| `LH_BOTTLE` | `0x00691320` | `6, 8, 8, 6, 0` |
+| `RH_OPEN` | `0x0069135c` | `5, 5, 4, 3, 23` |
+| `RH_CLOSED` | `0x006913ac` | `4, 4, 5, 3, 22` |
+| `RH_SHIELD` | `0x006913ac` | `4, 4, 5, 3, 22` |
+| `RH_BOW` | `0x006913d4` | `5, 5, 4, 3, 2` |
+| `RH_INSTRUMENT` | `0x006913fc` | `5, 5, 4, 3, 25` |
+| `RH_HOOKSHOT` | `0x00691424` | `5, 5, 4, 3, 9` |
+
+These are default model-group identities only. `FUN_00211aa4` and the inlined
+right-hand stage in `FUN_00201074` contain state-, animation-, speed-, and
+joint-table-driven overrides. The corpus does not authorize enabling a hand
+group without porting those override conditions.
+
 ## Retail body inventory
 
 Exact-member parsing gives:
@@ -69,17 +172,18 @@ Exact-member parsing gives:
 | Human | 10 | 26 | 93 | 34 (`0..33`) |
 
 Reproduce with `tools/mm_player_cmb_dump.py ARCHIVE_PATH CMB_MEMBER_PATH` in
-the parent zelda3d repository. The tool requires `ZELDA3D_MM3D_ROM` and never
-writes extracted asset bytes.
+the parent zelda3d repository. Add `--require-mids ID...` to turn an expected
+selector group set into a failing static asset gate. The tool requires
+`ZELDA3D_MM3D_ROM` and never writes extracted asset bytes.
 
 ## Remaining draw-policy frontier
 
-The base reset is only the first retail stage. `FUN_0020cfa4` continues with
-form/state additions, and `FUN_00211aa4` selects hand, weapon, sheath, shield,
-instrument, mask, and form-specific variants. Those selectors are not yet
-ported: their static tables and 3DS Player fields must be aligned to the N64
-`Player` fields before enabling any equipment group. Applying another game's
-mesh map, defaulting to all groups, or guessing from texture names is not valid.
+The base reset and complete sheath/back-shield stage are ported. The next open
+stages are `FUN_00211aa4`'s left-hand overrides and the right-hand selector
+inlined in `FUN_00201074`. Their default tables are recovered above, but their
+animation/state inputs still need complete typed alignment before enabling any
+hand, held weapon, instrument, or mask group. Applying another game's mesh map,
+defaulting to all groups, or guessing from texture names is not valid.
 
 ## Port integration evidence
 
