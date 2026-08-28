@@ -82,10 +82,11 @@ functions confirm the pointer roles: `FUN_00201074` consumes `+0x210`,
 | `+0x370` | `skelAnime.animation` identity | both hand selectors compare exact retail animation IDs |
 | `+0x37c` | `skelAnime.curFrame` | bottle in/out thresholds `12.0f`/`36.0f` and Zora guitar threshold `6.0f` |
 | `+0x380` | `skelAnime.endFrame` | sign selects the direction of the bottle item-change threshold |
-| `+0xe14` | `actionFunc` | Bremen-march and ExchangeItem callback identities |
+| `+0xe14` | `actionFunc` | Bremen-march, ExchangeItem, and `0x00200974` = typed `Player_Action_95` (Deku spin) callback identities |
 | `+0x11db0` | `stateFlags1` | hand selectors consume typed movement, swim, carry, and Zora-boomerang flags |
 | `+0x11db8` | `stateFlags3` | Deku-stick group 27 is hidden while bit `0x04000000` is set |
 | `+0x11e20` | `upperActionFunc` | Giant's Mask open hand compares this callback with `FUN_001ef758` |
+| `+0x11e78` | `unk_B10[1]` | Deku-spin phase initialized to `196608.0f` and stepped toward zero by `Player_Action_95` |
 | `+0x129bc` bit 16 | MM3D-private transient render flag | forces the open left hand; set by mount-transition and two actor-contact functions, with no exact typed 2S2H field yet |
 
 The save value used by the Human sheath override is also aligned. At
@@ -369,6 +370,57 @@ typed adapter returns the mesh mask plus material write in one production
 result. `mm3d_player.c` submits that write through the existing emit-ordered
 `Zelda3D_GL_SetMatConstOverride` channel before the pending draw is captured.
 
+### Deku spin material alpha
+
+The next bounded material stage is in `Player_Draw` itself at
+`0x001f9c9c..0x001f9d18`. It runs only for Deku and always writes material 6,
+constant 4, through mode 2:
+
+```c
+alpha = 0.0f;
+if (player->actionFunc == Player_Action_95) {
+    if (player->unk_B10[1] > 150732.796875f) {
+        alpha = (196608.0f - player->unk_B10[1]) * 0.000021798270608996972f;
+    } else if (player->unk_B10[1] < 45875.19921875f) {
+        alpha = player->unk_B10[1] * 0.000021798270608996972f;
+    } else {
+        alpha = 1.0f;
+    }
+}
+FUN_0020ce94(0.0f, 0.0f, 0.0f, alpha, Player + 0x334, 6, 4, 2);
+```
+
+The literal words are `0x48133333`, `0x37b6db6e`, `0x48400000`, and
+`0x47333333` at `0x001f9e64..0x001f9e70`. The call chain is
+`Player_Draw (0x001f9038) -> FUN_0020ce94 (0x0020ce94) -> FUN_001ff274
+(0x001ff274) -> FUN_00223fc8`. Mode 2 in `FUN_001ff274` reads the live
+constant, replaces alpha only, then writes it back and marks the constant
+present.
+
+The action and phase inputs have independent N64 Rosetta alignment. The setup
+branch in `FUN_001f0244` at `0x001f02bc..0x001f0318` installs callback
+`0x00200974`, writes `20000.0f` to `Player+0x11e74`, and writes
+`196608.0f` to `Player+0x11e78`. Decompilation of `0x00200974` matches typed
+2S2H `Player_Action_95`: both set state flags 0x20/0x40, run the Deku-spin
+attack cylinder, subtract `800.0f` from the first `unk_B10` value, rotate the
+Player, and step the second value toward zero. Therefore the port reads typed
+`Player::actionFunc` and `Player::unk_B10[1]` directly; it does not translate a
+raw offset or rescale the phase.
+
+The exact asset consumer is
+`/actors/zelda2_link_nuts_new.gar.lzs:nuts/model/link_deknuts.cmb`. Its material
+6 binds texture `link_nuts_f00`, constant 4 is baked as RGBA `(0,0,0,0)`, and
+mesh groups `11, 12, 13` are the only users of that material. The form base
+reset already exposes groups 11 and 13, so the zero-outside-spin alpha is
+necessary even when no spin is active; omitting the write leaves those groups
+at whatever constant snapshot the prior draw carried.
+
+The focused port is `mm3d_player_deku_spin_material_policy.{cpp,h}`, with
+typed form/action/phase adaptation in `mm3d_player_deku_spin_material.{cpp,h}`.
+`mm3d_player.c` submits the result through the same emit-ordered material
+override channel as the bottle constant before the pending Player draw is
+captured.
+
 The pure visibility policy is in `mm3d_player_left_hand_policy.{cpp,h}` and
 the narrow typed adapter is `mm3d_player_left_hand.{cpp,h}`. The adapter uses
 the live display-list table pointer independently of `leftHandType`, rejects
@@ -426,10 +478,12 @@ selector group set into a failing static asset gate. The tool requires
 ## Remaining draw-policy frontier
 
 The base reset, sheath/back-shield stage, right-hand/held-equipment stage,
-left-hand visibility stage, and bottle material-constant stage are ported from
-their retail tables and branch order. The next left-hand evidence gaps are the
-MM3D-private transient bit, retail-only Zora guitar wait/demo identities, and
-an authentic live equipment/bottle capture. Applying another
+left-hand visibility stage, bottle material-constant stage, and Deku-spin
+material-alpha stage are ported from their retail tables and branch order. The
+next left-hand evidence gaps are the MM3D-private transient bit and retail-only
+Zora guitar wait/demo identities. The parent port now has authentic live
+empty-bottle held/put-away mesh proof plus distinct empty/fish material rows;
+the Deku-spin material stage still needs an authentic live spin capture. Applying another
 game's mesh map, defaulting to all groups, or guessing from texture names is
 not valid.
 
