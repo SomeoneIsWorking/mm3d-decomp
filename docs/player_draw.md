@@ -245,11 +245,11 @@ visibility inputs without texture inference:
 
 | literal VA | value | role |
 |---:|---:|---|
-| `0x00211dcc` | `0x006269c4` | 23 bottle-content transform records, 16 bytes each |
+| `0x00211dcc` | `0x006269c4` | 23 bottle-material RGBA records, four floats each |
 | `0x00211dd4` | `0x00626b34` | form-indexed bottle hand mesh table |
 | `0x00211dd8` | `0x007751d8` | save context used for button-item validation |
 | `0x00211ddc` | `0x001ff52c` | ExchangeItem action callback |
-| `0x00211de0` | `0x00626b48` | form limb indices used by the bottle transform call |
+| `0x00211de0` | `0x00626b48` | form material indices used by the bottle constant-color call |
 | `0x00211de4` | `36.0f` | bottle-out visibility threshold; subtracting `0x00d00000` produces `12.0f` |
 | `0x00211de8` | `0x0000026b` | first of the three Deku drink animation IDs |
 | `0x00211dec` | `0x00691348` | form-indexed bottle-content mesh table |
@@ -323,15 +323,60 @@ and `0x2c0/0x2c1/0x2c2/0x2d3` are
 `pz_gakkiplay/gakkistart/gakkiwait/gakki_demo`. Exact CMB inventory checks
 also prove that every selected group exists in its form body.
 
+### Bottle material constant
+
+The call at `0x00211c90..0x00211cc8` is not a skeletal joint transform. It
+loads one four-float record from `0x006269c4`, selects the form entry from
+`0x00626b48`, and calls `FUN_0020ce94(Player+0x334, material, 0, rgba, 0)`.
+The wrapper at `0x0020ce94` forwards to `FUN_001ff274`; its mode-zero path
+calls `FUN_00223fc8` with all four components. `FUN_00223fc8` writes the
+selected runtime material's constant slot `(constantIndex + 5)`, mirrors the
+float values to clamped RGBA8, and `FUN_001ff274` marks the corresponding
+constant-presence bit. This is the MM3D equivalent of the already-identified
+OoT3D `Model_SetMaterialConstantColor` channel.
+
+The exact form material indices, in Fierce Deity/Goron/Zora/Deku/Human order,
+are `6, 3, 4, 3, 5`; the constant index is always zero. Static inspection of
+all five shipping form CMBs proves that each target material binds texture
+`p_bin_00` and has the same four-stage TEV chain sourcing `CONST[0]`. The
+separate visible bottle-content groups bind `p_bin_01`; therefore neither a
+bone index nor the content mesh's material index is a valid substitute for the
+retail target.
+
+The 23 records are indexed by the already-derived content index
+`itemAction - 0x15` with the same button/exchange-action and held-action
+fallback. Expressed as exact RGBA8 values (the binary floats are each
+`component / 255.0f`), they are:
+
+```text
+empty             0,   0,   0,   0    fish              0, 127, 255, 255
+spring water    136, 192, 255, 255    hot spring      168, 224, 255, 255
+zora egg          0, 128, 128, 255    deku princess  128,  64,   0, 255
+gold dust       255, 255,   0, 255    bottle 1C        0, 192,   0, 255
+seahorse        255, 192,   0, 255    mushroom       255, 100, 255, 255
+hylian loach      0,   0,   0, 255    bug              0, 127, 255, 255
+poe             255,   0, 255, 255    big poe        255,   0, 255, 255
+red potion      255,   0,   0, 255    blue potion      0,   0, 255, 255
+green potion      0, 255,   0, 255    milk           255, 230, 191, 255
+half milk       255, 230, 191, 255    chateau        255, 230, 191, 255
+fairy           255, 100, 255, 255    moon's tear    255, 230, 191, 255
+land deed       255, 230, 191, 255
+```
+
+The focused port is `mm3d_player_bottle_material_policy.{cpp,h}`. It consumes
+the bottle-route/content index owned by `mm3d_player_left_hand_policy`, and the
+typed adapter returns the mesh mask plus material write in one production
+result. `mm3d_player.c` submits that write through the existing emit-ordered
+`Zelda3D_GL_SetMatConstOverride` channel before the pending draw is captured.
+
 The pure visibility policy is in `mm3d_player_left_hand_policy.{cpp,h}` and
 the narrow typed adapter is `mm3d_player_left_hand.{cpp,h}`. The adapter uses
 the live display-list table pointer independently of `leftHandType`, rejects
 out-of-range linkb indices, and preserves the exact disabled-button rule. The
 selected hand, bottle-content, and Deku-stick groups are additive to the base,
-sheath, and right-hand masks. Two boundaries remain explicit: MM3D's private
-bit-16 transient has no exact typed 2S2H homolog and is currently false in the
-adapter; the 23-record bottle joint-transform stage is separate from mesh
-visibility and is not ported here. The N64 `gPlayerAnim_pz_gakkiplay` and
+sheath, and right-hand masks. MM3D's private bit-16 transient has no exact typed
+2S2H homolog and is currently false in the adapter. The N64
+`gPlayerAnim_pz_gakkiplay` and
 `gakkistart` symbols align the live guitar cases, but retail-only
 `pz_gakkiwait` and `pz_gakki_demo` have no independent typed N64 animation
 identity.
@@ -380,11 +425,11 @@ selector group set into a failing static asset gate. The tool requires
 
 ## Remaining draw-policy frontier
 
-The base reset, sheath/back-shield stage, right-hand/held-equipment stage, and
-left-hand visibility stage are ported from their retail tables and branch
-order. The next left-hand evidence gaps are the MM3D-private transient bit,
-retail-only Zora guitar wait/demo identities, the bottle-content joint
-transforms, and an authentic live equipment/bottle capture. Applying another
+The base reset, sheath/back-shield stage, right-hand/held-equipment stage,
+left-hand visibility stage, and bottle material-constant stage are ported from
+their retail tables and branch order. The next left-hand evidence gaps are the
+MM3D-private transient bit, retail-only Zora guitar wait/demo identities, and
+an authentic live equipment/bottle capture. Applying another
 game's mesh map, defaulting to all groups, or guessing from texture names is
 not valid.
 
