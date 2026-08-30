@@ -87,7 +87,7 @@ functions confirm the pointer roles: `FUN_00201074` consumes `+0x210`,
 | `+0x11db8` | `stateFlags3` | Deku-stick group 27 is hidden while bit `0x04000000` is set |
 | `+0x11e20` | `upperActionFunc` | Giant's Mask open hand compares this callback with `FUN_001ef758` |
 | `+0x11e78` | `unk_B10[1]` | Deku-spin phase initialized to `196608.0f` and stepped toward zero by `Player_Action_95` |
-| `+0x129bc` bit 16 | MM3D-private transient render flag | forces the open left hand; set by mount-transition and two actor-contact functions, with no exact typed 2S2H field yet |
+| `+0x129bc` bit 16 | multi-producer open-hand render flag | set by live `En_Boom` actors and a separate mount-transition path; the boomerang producer maps to typed `Player::zoraBoomerangActor`, while the mount predicate remains unresolved |
 
 The save value used by the Human sheath override is also aligned. At
 `0x0020d18c..0x0020d1c4`, retail reads the equipment halfword at save offset
@@ -289,8 +289,9 @@ In exact branch order, the visibility selector is:
    bottle side of marker frame 13. Forward playback uses `curFrame < 13`;
    reverse playback uses `curFrame > 13`.
 2. Otherwise force open for live left-hand type 4 plus
-   `PLAYER_STATE1_ZORA_BOOMERANG_THROWN`, or MM3D-private render flag
-   `Player+0x129bc` bit 16.
+   `PLAYER_STATE1_ZORA_BOOMERANG_THROWN`, or the live-boomerang render flag
+   `Player+0x129bc` bit 16. The flag's exact producer/lifetime is recovered in
+   [Live-boomerang producer](#live-boomerang-producer-player0x129bc-bit-16) below.
 3. Convert nominal open to closed above speed `2.0f`, except while swimming,
    carrying an actor, or running `FUN_001eff18`. Decompilation of that callback
    and the N64 Rosetta behavior identify typed `Player_Action_11` (Bremen
@@ -421,13 +422,50 @@ typed form/action/phase adaptation in `mm3d_player_deku_spin_material.{cpp,h}`.
 override channel as the bottle constant before the pending Player draw is
 captured.
 
+### Live-boomerang producer (`Player+0x129bc` bit 16)
+
+This flag was initially described only as a mount/contact transient. That label
+was incomplete: one exact producer belongs to MM3D's two-sided Zora boomerang
+actor:
+
+- actor profile `0x00671c1c` routes init `0x00353d2c`, destroy `0x00353e8c`,
+  update `0x003cc27c`, and draw `0x003cbbe0`; actor params 0/1 select the two
+  boomerang sides;
+- update `0x003cc27c` and flight action `0x0057c7f4` both OR bit `0x10000`
+  into `Player+0x129bc` while the actor is live;
+- destroy `0x00353e8c` maintains the surviving sibling link, clears
+  `PLAYER_STATE1_ZORA_BOOMERANG_THROWN` when the last actor dies, sets
+  `stateFlags3` bit `0x00800000`, and clears private bit `0x10000`.
+
+Those destructor transitions are the exact N64 `EnBoom_Destroy` contract:
+`PLAYER_STATE3_ZORA_BOOMERANG_CAUGHT` is bit `0x00800000`, and
+`Player::zoraBoomerangActor` is reassigned to the surviving left/right actor or
+cleared after the last one. Therefore the typed port uses a non-null
+`zoraBoomerangActor` whose actor ID is `ACTOR_EN_BOOM`. The ID guard is required
+because MM's Deku-flight code reuses the same Player pointer field for a Deku
+nut projectile; pointer non-null by itself would fabricate an open-hand state.
+
+This does not close the flag's second producer. Player update helper
+`0x002250f0` also sets and clears bit `0x10000` around the mount-transition
+branch that snaps Player to the ride actor. Its exact host-side timing predicate
+is not yet typed, so that half remains inactive rather than being approximated
+from `rideActor` alone.
+
+The typed port was exercised through a native Zora B-charge/release. While
+`leftHandType` remained 1, the live actor identity changed from null to
+`ACTOR_EN_BOOM` and the shipping left-hand mask changed from closed mesh 2 to
+open mesh 1. Catch/destruction cleared the actor pointer and restored mesh 2.
+This distinguishes the recovered producer from the pre-existing selector path,
+which requires left-hand type 4 together with the thrown-state flag.
+
 The pure visibility policy is in `mm3d_player_left_hand_policy.{cpp,h}` and
 the narrow typed adapter is `mm3d_player_left_hand.{cpp,h}`. The adapter uses
 the live display-list table pointer independently of `leftHandType`, rejects
 out-of-range linkb indices, and preserves the exact disabled-button rule. The
 selected hand, bottle-content, and Deku-stick groups are additive to the base,
-sheath, and right-hand masks. MM3D's private bit-16 transient has no exact typed
-2S2H homolog and is currently false in the adapter. The N64
+sheath, and right-hand masks. The live-boomerang producer uses the typed actor
+lifetime recovered above; the unresolved mount producer remains inactive, and
+neither path reads MM3D's private offset. The N64
 `gPlayerAnim_pz_gakkiplay` and
 `gakkistart` symbols align the live guitar cases, but retail-only
 `pz_gakkiwait` and `pz_gakki_demo` have no independent typed N64 animation
