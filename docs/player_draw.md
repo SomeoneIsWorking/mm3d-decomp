@@ -459,17 +459,17 @@ Only the zero-result branch can pulse the render flag. At
 
 ```c
 Player + 0x11e4e == 0 &&
-*(float *)(Player + 0x129d4) > 50.0f &&
+(int32_t)*(uint32_t *)(Player + 0x129d4) > 0x42480000 &&
 FUN_0022de58(40.0f, 0.0f, Player + 0x334) != 0
 ```
 
 It then copies `skelAnime.endFrame` (`+0x388`) to `skelAnime.curFrame`
 (`+0x37c`) and ORs bit `0x10000`. The constants are literal-pool values
-`0x42480000` (50.0f) and `0x42200000` (40.0f), verified against the ARM
-instructions. `FUN_0022de58` (`0x0022de58`, 184 bytes) is the retail
-wrap-aware predicate over the `+0x334` substructure; its exact helper body is
-preserved in `scratch/mm3d_re/mount_open_hand_decomp.txt` from the persistent
-`build/ghidra-mm3d` project.
+`0x42480000` and `0x42200000` (40.0f). The former shares 50.0f's IEEE-754
+encoding, but retail reaches it through an integer `ldr`/signed-`cmp`/`ble`
+sequence at `0x0022533c..0x0022534c`, not VFP; it must remain a raw-word
+predicate until the field is typed. `FUN_0022de58` (`0x0022de58`, 184 bytes)
+is the retail wrap-aware predicate over the `+0x334` substructure.
 
 This is enough to rule out the old approximation, but not enough to enable a
 host port: MM's `Player+0x11e4e`, `Player+0x129d4`, and the `+0x334` virtual
