@@ -445,11 +445,36 @@ cleared after the last one. Therefore the typed port uses a non-null
 because MM's Deku-flight code reuses the same Player pointer field for a Deku
 nut projectile; pointer non-null by itself would fabricate an open-hand state.
 
-This does not close the flag's second producer. Player update helper
-`0x002250f0` also sets and clears bit `0x10000` around the mount-transition
-branch that snaps Player to the ride actor. Its exact host-side timing predicate
-is not yet typed, so that half remains inactive rather than being approximated
-from `rideActor` alone.
+### Mount-transition open-hand pulse (`Player+0x129bc` bit 16)
+
+Static Ghidra recovery from the retail ARM image now bounds the second producer
+without guessing from the N64 `rideActor` pointer. `FUN_002250f0`
+(`0x002250f0`, 4240 bytes) first calls virtual slot `+0x20` on the object at
+`Player+0x334`. A nonzero result takes the mount-attach path: at
+`0x00225310..0x0022531c` it clears bit `0x10000` and writes `1` to the attached
+object at `+0x1fc`.
+
+Only the zero-result branch can pulse the render flag. At
+`0x0022532c..0x00225380`, retail requires all of:
+
+```c
+Player + 0x11e4e == 0 &&
+*(float *)(Player + 0x129d4) > 50.0f &&
+FUN_0022de58(40.0f, 0.0f, Player + 0x334) != 0
+```
+
+It then copies `skelAnime.endFrame` (`+0x388`) to `skelAnime.curFrame`
+(`+0x37c`) and ORs bit `0x10000`. The constants are literal-pool values
+`0x42480000` (50.0f) and `0x42200000` (40.0f), verified against the ARM
+instructions. `FUN_0022de58` (`0x0022de58`, 184 bytes) is the retail
+wrap-aware predicate over the `+0x334` substructure; its exact helper body is
+preserved in `scratch/mm3d_re/mount_open_hand_decomp.txt` from the persistent
+`build/ghidra-mm3d` project.
+
+This is enough to rule out the old approximation, but not enough to enable a
+host port: MM's `Player+0x11e4e`, `Player+0x129d4`, and the `+0x334` virtual
+object are not yet typed against 2S2H. Keep this producer inactive until those
+three identities are recovered; `rideActor` alone would over-open the hand.
 
 The typed port was exercised through a native Zora B-charge/release. While
 `leftHandType` remained 1, the live actor identity changed from null to
