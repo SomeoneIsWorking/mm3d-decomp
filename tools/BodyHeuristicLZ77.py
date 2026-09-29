@@ -1,3 +1,7 @@
+#@runtime Jython
+# Ghidra 12 runs headless scripts under PyGhidra, which this host does not have; without
+# this header every script in this directory fails to load with "Python is not available",
+# which is why MM3D had a fully built Ghidra project and zero decompiled output.
 # -*- coding: utf-8 -*-
 # Body-heuristic search for the Grezzo LzS decoder.
 #

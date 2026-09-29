@@ -1,3 +1,7 @@
+#@runtime Jython
+# Ghidra 12 runs headless scripts under PyGhidra, which this host does not have; without
+# this header every script in this directory fails to load with "Python is not available",
+# which is why MM3D had a fully built Ghidra project and zero decompiled output.
 # -*- coding: utf-8 -*-
 # Trace callers of ".gar.lzs" path literals in the binary. Uses memory.findBytes
 # across ALL blocks so we don't miss ones outside block[0]. Then walks references

@@ -1,3 +1,7 @@
+#@runtime Jython
+# Ghidra 12 runs headless scripts under PyGhidra, which this host does not have; without
+# this header every script in this directory fails to load with "Python is not available",
+# which is why MM3D had a fully built Ghidra project and zero decompiled output.
 # -*- coding: utf-8 -*-
 # Find the function that opens .gar.lzs archives. Strategy: find every immediate operand
 # equal to a VA in [0x00692818, 0x006A0000) (the zelda2_XXX C-string table), then map

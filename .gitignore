@@ -3,6 +3,13 @@ scratch/
 *.code
 *.code.raw
 *.bin
-build/
 __pycache__/
 *.pyc
+.env
+
+# Only the Ghidra project itself is ignored. The recovered decompilation under build/decomp/ is
+# TRACKED, deliberately and in line with oot3d-decomp, which tracks its 1374 recovered .c files:
+# the whole point of this repository is the readable C, and a .gitignore of `build/` here would
+# have silently discarded every function recovered from the image, with no way to tell from a
+# clean status that anything had been lost.
+build/ghidra/

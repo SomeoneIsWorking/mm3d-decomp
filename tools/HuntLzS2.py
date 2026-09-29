@@ -1,3 +1,7 @@
+#@runtime Jython
+# Ghidra 12 runs headless scripts under PyGhidra, which this host does not have; without
+# this header every script in this directory fails to load with "Python is not available",
+# which is why MM3D had a fully built Ghidra project and zero decompiled output.
 # -*- coding: utf-8 -*-
 # Tighter LzS hunt: find functions with ALL FOUR magic-byte immediates
 # (0x4C 'L', 0x7A 'z', 0x53 'S', 0x01 '\1') as CMP-with-imm within ~48 bytes.

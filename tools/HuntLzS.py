@@ -1,3 +1,7 @@
+#@runtime Jython
+# Ghidra 12 runs headless scripts under PyGhidra, which this host does not have; without
+# this header every script in this directory fails to load with "Python is not available",
+# which is why MM3D had a fully built Ghidra project and zero decompiled output.
 # -*- coding: utf-8 -*-
 # Hunt for the LzS decompressor by looking for calls whose immediate arg near a load
 # is the LzS magic. In ARM the 4-byte magic 0x01537A4C is normally loaded from a
