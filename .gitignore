@@ -13,3 +13,6 @@ __pycache__/
 # have silently discarded every function recovered from the image, with no way to tell from a
 # clean status that anything had been lost.
 build/ghidra/
+build/ghidra-*/
+*.lock
+*.lock~
