@@ -35,3 +35,5 @@ Same conventions:
 - Copyrighted assets (`.3ds`, `.z64`) NEVER committed — provided via env vars in `soh3d/.env`
   (`ZELDA3D_MM3D_ROM`, `ZELDA3D_MM_ROM`).
 - Tooling that's genuinely shared with oot3d-decomp stays there; MM3D-specific work lives here.
+
+Built with AI assistance (Claude and other LLMs).
