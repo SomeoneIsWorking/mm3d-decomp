@@ -40,11 +40,18 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - gap: 
 - notes: 
 
-### cutscene.textbox — Message_GetState and Message_CloseTextbox in scripts
-- status: re-partial
+### cutscene.script — .jdb script layout and command sizes
+- status: re-verified
 - deps: cutscene.interpreter
-- evidence: narration skip closes every box and lands in lw_meetstk.jdb
-- where: docs/cutscene.md
-- gap: a choice inside a skipped cutscene is untested; MessageContext is unnamed
+- evidence: all 334 scripts of the USA dump walk to the next script's magic; z3d-mods reads the held text entry from it in climia_raiders.jdb
+- where: docs/cutscene.md, include/z3D.h
+- gap: 
 - notes: 
 
+### cutscene.textbox — Message_GetState and Message_CloseTextbox in scripts
+- status: re-verified
+- deps: cutscene.script
+- evidence: narration skip closes every box and lands in lw_meetstk.jdb; climia_raiders.jdb stops at "Do you understand?" and Yes and No land as watching does
+- where: docs/cutscene.md
+- gap: 
+- notes: MessageContext is unnamed
