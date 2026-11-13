@@ -108,6 +108,7 @@ typedef struct PlayState {
 } PlayState;
 
 // The touch screen's screens (docs/ui.md); the values index gUiScreens.
+#define UI_SCREEN_BLACK 0
 #define UI_SCREEN_MAIN 1
 #define UI_SCREEN_ITEMS 4
 #define UI_SCREEN_COUNT 8

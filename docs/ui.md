@@ -6,6 +6,7 @@ points at the one that is up.
 
 | Index | Screen | Checked |
 |---|---|---|
+| 0 | Black: the touch screen is blank | live: the opening narration (`legend.jdb`) |
 | 1 | Main: hearts, rupees, View, Gear, the item buttons, Masks/Map/Items tabs | live: South Clock Town, in play and during a cutscene |
 | 4 | Items | live: Select in South Clock Town |
 

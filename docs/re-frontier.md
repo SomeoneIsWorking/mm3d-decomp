@@ -59,7 +59,7 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### ui.screen — which touch screen is up
 - status: re-partial
 - deps: 
-- evidence: gUiScreenContext.activeScreen equals gUiScreens[1] in play and gUiScreens[4] with Items open (live reads)
+- evidence: gUiScreenContext.activeScreen equals gUiScreens[1] in play and gUiScreens[4] with Items open and gUiScreens[0] in the opening narration (live reads)
 - where: docs/ui.md
-- gap: entries 0, 2, 3, 5, 6, 7 and the word after activeScreen are not checked
+- gap: entries 2, 3, 5, 6, 7 and the word after activeScreen are not checked
 - notes: 
