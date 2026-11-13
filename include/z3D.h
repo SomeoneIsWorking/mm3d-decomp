@@ -12,6 +12,9 @@
 #define EQUIP_BUTTON_I 3
 #define EQUIP_BUTTON_II 4
 #define ITEM_NONE 0xFF
+#define INVENTORY_SLOTS 48 // items, then masks
+// PlayState.buttonsHeld: the HID module's debug bit, which no 3DS button sets.
+#define PAD_DEBUG 0x1000
 #define PLAYER_FORM_HUMAN 4
 
 typedef struct EquipmentData {
