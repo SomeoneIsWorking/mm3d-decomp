@@ -59,7 +59,15 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### ui.screen — which touch screen is up
 - status: re-partial
 - deps: 
-- evidence: gUiScreenContext.activeScreen equals gUiScreens[1] in play and gUiScreens[4] with Items open and gUiScreens[0] in the opening narration (live reads)
+- evidence: gUiScreenContext.activeScreen equals gUiScreens[1] in play and gUiScreens[4] with Items open, [0] in the opening narration, [3] [5] [6] [7] opened by touch (live reads)
 - where: docs/ui.md
-- gap: entries 2, 3, 5, 6, 7 and the word after activeScreen are not checked
+- gap: entry 2 and the word after activeScreen are not checked
+- notes: 
+
+### ui.hud_visibility — how much of the HUD shows
+- status: re-partial
+- deps: 
+- evidence: CommonData.hudVisibility reads 50 in play, 1 in the opening narration, 2 on South Clock Town's title card and cutscene (live reads)
+- where: docs/ui.md
+- gap: only those three values seen; the writer is not decompiled
 - notes: 

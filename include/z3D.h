@@ -23,6 +23,10 @@ typedef struct CommonData {
     /* 0x00008 */ SaveData save;
     /* 0x01A90 */ char unk_01A90[0x11B8C];
     /* 0x1361C */ int32_t setup; // 1 on the title screen, 0 in play
+    /* 0x13620 */ char unk_13620[0x12A];
+    /* 0x1374A */ uint16_t nextHudVisibility; // set for a frame when the HUD is asked to change
+    /* 0x1374C */ uint16_t hudVisibility; // HUD_VISIBILITY_*
+    /* 0x1374E */ uint16_t hudVisibilityTimer;
 } CommonData;
 
 typedef struct CutsceneContext {
@@ -107,10 +111,19 @@ typedef struct PlayState {
     /* 0xC52E */ int16_t nextEntrance;
 } PlayState;
 
+// CommonData.hudVisibility (docs/ui.md); the names are the N64 game's.
+#define HUD_VISIBILITY_NONE 1
+#define HUD_VISIBILITY_NONE_ALT 2
+#define HUD_VISIBILITY_ALL 50
+
 // The touch screen's screens (docs/ui.md); the values index gUiScreens.
 #define UI_SCREEN_BLACK 0
 #define UI_SCREEN_MAIN 1
+#define UI_SCREEN_GEAR 3
 #define UI_SCREEN_ITEMS 4
+#define UI_SCREEN_MAP 5
+#define UI_SCREEN_MASKS 6
+#define UI_SCREEN_OCARINA 7
 #define UI_SCREEN_COUNT 8
 
 typedef struct UiScreenContext {
