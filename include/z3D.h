@@ -5,6 +5,21 @@
 
 #include <stdint.h>
 
+// Item buttons, in this order in both arrays (docs/items.md).
+#define EQUIP_BUTTON_B 0
+#define EQUIP_BUTTON_Y 1
+#define EQUIP_BUTTON_X 2
+#define EQUIP_BUTTON_I 3
+#define EQUIP_BUTTON_II 4
+#define ITEM_NONE 0xFF
+#define PLAYER_FORM_HUMAN 4
+
+typedef struct EquipmentData {
+    /* 0x00 */ uint8_t buttonItems[4][5]; // item on each button; row 0 is Link's in human form
+    /* 0x14 */ uint8_t buttonSlots[4][5]; // the inventory slot each item came from
+    /* 0x28 */ uint16_t swordShield;
+} EquipmentData; // size = 0x2A
+
 typedef struct SaveData {
     /* 0x0000 */ char unk_0000[0x4];
     /* 0x0004 */ uint8_t isNight;
@@ -13,7 +28,13 @@ typedef struct SaveData {
     /* 0x0010 */ int32_t totalDay;
     /* 0x0014 */ char unk_0014[0x4];
     /* 0x0018 */ uint16_t time; // 0x4000 is 6:00, 0xC000 is 18:00
-    /* 0x001A */ char unk_001A[0x122E];
+    /* 0x001A */ char unk_001A[0x4];
+    /* 0x001E */ uint8_t playerForm; // PLAYER_FORM_*
+    /* 0x001F */ char unk_001F[0x12B];
+    /* 0x014A */ EquipmentData equipment;
+    /* 0x0174 */ uint8_t items[24]; // by slot; the mask slots follow
+    /* 0x018C */ uint8_t masks[24];
+    /* 0x01A4 */ char unk_01A4[0x10A4];
     /* 0x1248 */ uint8_t weekEventReg[100]; // flag n is byte n / 8, bit n % 8
     /* 0x12AC */ char unk_12AC[0x7DC];
 } SaveData; // size = 0x1A88
@@ -98,7 +119,8 @@ typedef struct CsCmdActorCue {
 #define CS_TEXT_TYPE_ALL_NORMAL_MASKS 5
 
 typedef struct PlayState {
-    /* 0x0000 */ char unk_0000[0x34];
+    /* 0x0000 */ char unk_0000[0x30];
+    /* 0x0030 */ uint32_t buttonsHeld; // pad bits; bit 12 passes through from the pad
     /* 0x0034 */ uint32_t buttonsPressed; // pressed this frame; bit 3 is Start
     /* 0x0038 */ char unk_0038[0x110];
     /* 0x0148 */ int16_t sceneNum;

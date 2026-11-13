@@ -1,5 +1,7 @@
 vaddr,name
+0016ebac,func_0016EBAC
 0017419c,Cutscene_BeginScript
+00174640,Actor_UpdateAll
 001846b4,Cutscene_ProcessCommands
 001c5018,Message_GetState
 001ef228,Message_CloseTextbox
