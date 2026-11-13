@@ -10,7 +10,8 @@ The USA **1.0** executable (asset paths `C:\Jenkins\workspace\joker\...`). Proje
 v110 produces this layout from the USA 1.1 dump (`joker-1_1_0`), so mods that ride on Project
 Restoration use these addresses unchanged: the LDR at 0x1F6524 and `z_player.cpp(28254)` at
 0x64656C are byte-exact in its output. Named addresses are in `symbols/functions.csv` and
-`include/z3D.h`; cutscene findings in `docs/cutscene.md`.
+`include/z3D.h`; cutscene findings in `docs/cutscene.md`. Raw Ghidra output (`build/decomp/`,
+`src/<module>/`) is regenerated locally by the tools and gitignored.
 
 MM3D has **no public decompilation or symbols**. Everything here is derived empirically:
 - **Static RE** of the decompressed ARM executable (`.code`) and of the RomFS assets (`.gar.lzs`,

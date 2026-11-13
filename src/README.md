@@ -1,5 +1,7 @@
 # `mm3d-decomp/src/` — organized decompiled output
 
+The module directories are raw decompiler output, regenerated locally and gitignored.
+
 One directory per **module**, where a module is the original C++ source file the
 developers' own assert strings name. Not one directory per address range: MM3D's
 `.text` is not laid out in per-file blocks (see `docs/code_layout.md`), so the module
