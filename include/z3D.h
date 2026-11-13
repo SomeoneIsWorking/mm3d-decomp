@@ -107,7 +107,21 @@ typedef struct PlayState {
     /* 0xC52E */ int16_t nextEntrance;
 } PlayState;
 
+// The touch screen's screens (docs/ui.md); the values index gUiScreens.
+#define UI_SCREEN_MAIN 1
+#define UI_SCREEN_ITEMS 4
+#define UI_SCREEN_COUNT 8
+
+typedef struct UiScreenContext {
+    /* 0x00 */ void* vtable;
+    /* 0x04 */ char unk_04[0x4];
+    /* 0x08 */ void* activeScreen; // the gUiScreens entry that is up
+    /* 0x0C */ char unk_0C[0x4];
+} UiScreenContext; // size = 0x10 (at least)
+
 extern CommonData gCommonData; // 0x007751D8
 extern PlayState* gPlayState; // 0x00667890
+extern UiScreenContext gUiScreenContext; // 0x0072F5BC
+extern void* gUiScreens[UI_SCREEN_COUNT]; // 0x00656B00
 
 #endif
