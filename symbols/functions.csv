@@ -1,0 +1,7 @@
+vaddr,name
+0017419c,Cutscene_BeginScript
+001846b4,Cutscene_ProcessCommands
+001c5018,Message_GetState
+001ef228,Message_CloseTextbox
+003f1a4c,CutsceneHandler_RunScript
+004cf9c4,CutsceneHandler_StartScript

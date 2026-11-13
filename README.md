@@ -5,6 +5,13 @@ product code `CTR-P-AJRE`). Sibling of [`oot3d-decomp`](../oot3d-decomp): same t
 philosophy — recover MM3D's structures and behavior as ground truth so [`soh3d`](../soh3d)'s Zelda3D
 engine can render MM using OoT3D-style assets instead of guessing from N64 MM (2S2H).
 
+## Build
+The USA **1.0** executable (asset paths `C:\Jenkins\workspace\joker\...`). Project Restoration
+v110 produces this layout from the USA 1.1 dump (`joker-1_1_0`), so mods that ride on Project
+Restoration use these addresses unchanged: the LDR at 0x1F6524 and `z_player.cpp(28254)` at
+0x64656C are byte-exact in its output. Named addresses are in `symbols/functions.csv` and
+`include/z3D.h`; cutscene findings in `docs/cutscene.md`.
+
 MM3D has **no public decompilation or symbols**. Everything here is derived empirically:
 - **Static RE** of the decompressed ARM executable (`.code`) and of the RomFS assets (`.gar.lzs`,
   `.zsi`, `.cmb`, `.csab`). See `tools/extract_code.py`, `docs/formats/`.
