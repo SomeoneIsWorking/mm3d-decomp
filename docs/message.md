@@ -43,10 +43,10 @@ for those marked, seen drawn (z3d-mods runs `txt-mm-r4`, `txt-mm-w1` to `txt-mm-
 | Icon | Is |
 |---|---|
 | 1 to 6 | A (seen), B (seen), X (seen), Y (seen), L (seen), R (seen) |
-| 7 | START (seen; no English message uses it) |
+| 7 | START (seen; no message in any language uses it) |
 | 8 | HOME ("press ... to return to the HOME Menu", seen) |
 | 9 | POWER (no message uses it; seen drawn) |
-| 0x0A to 0x10 | the +Control Pad, each direction and both axes |
+| 0x0A to 0x10 | the +Control Pad, each direction and both axes (0x0E draws the cell at (160, 16), seen in `txt-mm-pause1`); the text in all three languages uses only 0x0C |
 | 0x11 | Circle Pad (seen) |
 | 0x12 to 0x15 | Circle Pad up, right, down and left (the cells' arrows; the camera options' inverted texts agree) |
 | 0x16, 0x17 | Circle Pad up and down, left and right |
