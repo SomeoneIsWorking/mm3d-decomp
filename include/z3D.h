@@ -379,13 +379,17 @@ typedef struct MotionState {
 #define GYRO_READER_ZERO_DRIFT_ON 0x855 // u8
 #define GYRO_READER_REVISE_ON 0x856 // u8: the accelerometer pulls the direction toward gravity
 #define GYRO_READER_ZERO_PLAY 0x858 // float
+#define GYRO_READER_DRIFT_RADIUS 0x85C // float: samples this near the newest are averaged with it; negative, none is
+#define GYRO_READER_SCALE 0x888 // double[3]: the HID sample times this, rounded, is the reader's raw unit
 #define GYRO_READER_DRIFT_BIAS 0x8A0 // float[3], raw units
 
 // The player's look in first person and with an aimed item (Player_UpdateLook).
 #define PLAYER_STATE_FLAGS_1 0x11DB0 // u32
 #define PLAYER_STATE1_FIRST_PERSON 0x100000
 #define PLAYER_LOOK_BASE 0x125B8 // s16[3]: focus.rot at the last motion reset
-#define PLAYER_LOOK_FLAGS 0x129BC // u32: bit 0, the gyroscope sets focus.rot
+#define PLAYER_LOOK_FLAGS 0x129BC // u32, PLAYER_LOOK_*
+#define PLAYER_LOOK_GYRO 0x1 // the gyroscope sets focus.rot; stays set after the look ends
+#define PLAYER_LOOK_FIRST_PERSON 0x2 // the player's draw sets it each frame the view is first person
 #define PLAYER_PAD 0x129CC // pointer to the pad state the player reads
 
 extern MotionState gMotionState; // 0x006B1DF4

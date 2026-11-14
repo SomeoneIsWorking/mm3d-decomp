@@ -76,9 +76,37 @@ Speeds are in units of 360 degrees a second. Other fields: +0x7E0 speed x, y, z;
 - Revise: once a `ReadLocal`, when the acceleration's length is within 0.4 of 1 G, the matrix
   moves 3% of the way to putting gravity on its second row. With an accelerometer that never
   changes, pitch decays back to level at that rate; yaw around gravity is untouched.
+- The mean of like samples (the first half of the zero drift) runs whatever +0x855 says: with the
+  drift off, a slow turn is still spread over up to `count` samples. Its radius, +0x85C, is
+  divided by the unit and rounded to at least 1; a negative radius gives an empty range, no
+  sample is like the newest, and the sample is taken as it is.
+- A HID sample becomes the reader's raw unit as (sample - zero at +0x87C) * scale at +0x888 (a
+  double per axis) * +0x14B0 (1.0), rounded. The scale comes from the HID's calibration: on
+  Azahar it is 13455/13400, so 14.375 units are 1.0041 degrees a second. One unit is a speed of
+  +0x838 = 1/5175 (1 / (14.375 * 360)), so at a scale of 1 a sample of n units turns the
+  direction n/1437.5 degrees.
+- `GyroscopeReader_UpdateDirection` turns the matrix to first order. Per axis a = +0x850 * s *
+  (1 + 0.0001 * (+0x84C * s)^2), with s the speed and +0x84C = 3.6, which is close to the tangent
+  of the angle; then M becomes (I + [a]x) M from the old rows, and 0x13D0CC makes it orthonormal
+  again (rows normalised and averaged with their cross products until it settles). A turn on
+  one axis comes out right; a sample that turns on two axes at once is off in the second order
+  of its angle (a 14 degree sample around an axis between y and z: 0.14% short, and 0.1 degrees
+  of pitch over 150 of yaw; at 6 degrees a sample or less nothing shows).
 - The matrix turns around the 3DS's own axes. A yaw rate on y alone, after a pitch, tilts the
   first row out of the horizontal plane and the game reads a different pitch. A yaw around world
   up is the rate vector (0, cos p, -sin p) for a 3DS pitched by p on x.
+
+## The look's flags
+
+Player +0x129BC: `PLAYER_LOOK_GYRO` (bit 0) stays set once the look has ended (it reads 1 back
+in third person). `PLAYER_LOOK_FIRST_PERSON` (bit 1) is written every frame by the player's draw
+(0x201074): set when the draw is the first-person one, clear otherwise. Both are set in the
+first-person view (3) and while the bow is aimed (0x43), and that is where the gyroscope sets the
+view. On the frame a look starts, `lookBase` is new while `gMotionState`'s angles are still the
+old ones; they are 0 from the next `Motion_Update`.
+
+`focus.rot` is the base plus the angle times the scale in 65536ths of a turn, cut to whole
+units, and held at +-14000 units of pitch (76.9 degrees) in first person.
 
 ## Seen in the running game
 
@@ -104,10 +132,17 @@ the reader's own angle, which is what reached the game.
   after the turn stops while the bias falls to 0.
 - `gyro-mm7`: `motionOff` written 1, the input that had turned the view leaves it still.
 
+- `aim-mm5` (the reader with zero play, zero drift and the revise off, the radius at -1, the
+  bias 0 and the scale 1; samples of whole units, a turn on x or around world up per sample, 6
+  degrees at most): 9.5230 degrees of yaw asked of the 3DS read 9.5230 in `gMotionState` and
+  turn `focus.rot.y` 19.995 degrees; 10.2721 of pitch turn `focus.rot.x` 14.996; 14.2857 of yaw
+  at 10.27 degrees of pitch, either way up, turn the view 29.98 and leave the pitch within 0.005.
+  The same with the bow aimed (X held, flags 0x43): the bow's look is this one.
+
 ## Not known
 
-- The aimed items (bow, hookshot) were not run: `Player_UpdateLook` is their shared function by
-  its call sites only.
+- The hookshot and the Zora's fins were not run. The looks that start on `stateFlags1`
+  0x1000000 or the action function 0x221AD8 without the first-person draw were not seen.
 - What sets bit 1 of player +0x129BC, and the +0x3524 byte the pad's look reads (1 and 3 flip the
   pitch stick, 2 and 3 the yaw stick, by the code).
 - `GyroscopeReader_ReadLocal`'s raw-to-speed scale was not checked against a real console's
