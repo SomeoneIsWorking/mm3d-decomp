@@ -14,3 +14,6 @@ USA 1.0 layout. Structures are in `include/z3D.h`.
   arrival; scale 0.01 at +0x58, gravity -1 at +0x74, terminal velocity -24 at +0x78.
 - Writing a position into `home.pos`, `world.pos` and `prevPos` together moves the player: written
   200 above the ground, he reads 185.3 twelve frames later and lands.
+- `Actor.textId` (+0x11A, u16) is the message A opens when the actor is checked or spoken to, with
+  the N64 game's ids: South Clock Town's owl statue (actor id 0x1B2, category 7) holds 0xC01, its
+  save prompt. Written to 0x22 before the check, the statue shows "You got the Hero's Bow!".

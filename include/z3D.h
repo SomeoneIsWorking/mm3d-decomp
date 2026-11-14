@@ -151,7 +151,9 @@ typedef struct Actor {
     /* 0x078 */ float terminalVelocity;
     /* 0x07C */ char unk_07C[0x90];
     /* 0x10C */ Vec3f prevPos; // world.pos before this frame's update
-    /* 0x118 */ char unk_118[0x1C];
+    /* 0x118 */ char unk_118[0x2];
+    /* 0x11A */ uint16_t textId; // the message a check or a talk opens
+    /* 0x11C */ char unk_11C[0x18];
     /* 0x134 */ struct Actor* next; // in its category's list
 } Actor; // size = 0x138 (at least)
 
