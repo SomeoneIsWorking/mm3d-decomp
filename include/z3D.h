@@ -92,6 +92,8 @@ typedef struct SaveData {
 #define QUEST_SONG_COUNT 12
 #define QUEST_SONG_LULLABY_INTRO 24
 #define QUEST_BOMBERS_NOTEBOOK 18
+#define WEEK_EVENT_REGION_MAPS 0x23 // weekEventReg byte: bit n owns region n's map, the Map screen's loupe (docs/ui.md)
+#define REGION_MAP_COUNT 6
 
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene

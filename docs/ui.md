@@ -32,6 +32,17 @@ Live values (USA 1.0 layout under Project Restoration): the table reads 0x656AFC
 0x6F6B3C, 0x6F4130, 0x6F42D8, 0x6F45B8, 0x6F660C, 0x6F72F4; `activeScreen` is 0x6F694C in play and
 0x6F42D8 with the Items screen open.
 
+## Map screen
+
+`MenuMapState.cpp` (0x594000 to 0x598000): 0x5975AC opens the screen, 0x594400 reads its input.
+The screen keeps its touch-screen map at +0x18, the loupe's pane at +0x30 and the loupe's position
+at +0x75C/+0x760 (floats), which the Circle Pad moves. The loupe shows only while the current
+region's map is owned (+0x78C): bit n of `weekEventReg[0x23]` (`WEEK_EVENT_REGION_MAPS`), n from
+the region's entry in the table at 0x620C18 (0x2301 to 0x2320, six regions). Seen: X zooms the top
+screen into the player's region ("Zoom In", then "Zoom Out"), A switches the touch-screen map
+between the loupe and its panning arrows, B leaves (z3d-mods runs `gap-zm2`, `gap-zm3`). Without the
+region's map there is no loupe and X does nothing (`gap-zm1`).
+
 ## HUD visibility
 
 `gCommonData.hudVisibility` (+0x1374C) says how much of the HUD shows, with the N64 game's
