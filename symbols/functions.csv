@@ -9,6 +9,7 @@ vaddr,name
 0012e10c,GyroscopeReader_UpdateDirection
 0012e2d8,GyroscopeReader_CalculateAxis
 0012e494,GyroscopeReader_ReviseDirection
+00133930,GzfFont_Init
 0015f644,Play_Update
 0016ebac,func_0016EBAC
 001707cc,func_001707CC

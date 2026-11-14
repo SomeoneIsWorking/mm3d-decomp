@@ -29,6 +29,25 @@ Codes seen in the US text, by what the printer does with them:
 
 0x27 and 0x28 come in pairs around a phrase (704 and 703 uses).
 
+Words of arguments after a code, from the table at 0x63DCCC (a byte a code, 0x00 to 0x3C): one
+for 0x11, 0x15, 0x1C, 0x22, 0x25, 0x26, 0x29, 0x2A, 0x2B, 0x2D, 0x2F, 0x31 and 0x3A, two for
+0x32, three for 0x3B, none for the rest. 0x20 reads 4 there: one word, then a singular and a
+plural as strings in the text. With these every US English message but one reads to its end
+and back byte for byte (z3d-mods `tools/z3dmods/gmsg.py`).
+
+0x25 n draws a prompt icon. By the words around them in the English text and, for those
+marked, seen drawn (z3d-mods run `txt-mm-r4`):
+
+| Icon | Is |
+|---|---|
+| 1 to 6 | A, B (seen), X, Y (seen), L (seen), R |
+| 8 | taken to be START ("press ... to return") |
+| 0x11 | Circle Pad |
+| 0x12 to 0x15 | Circle Pad down, left, up and right (the camera options) |
+| 0x18, 0x1B | the I and II item buttons (seen) |
+| 0x1C, 0x1E, 0x20, 0x2D, 0x2E | touch-screen icons ("Tap ... on the lower screen") |
+| 0x2F | a place's marker before its name (the map's list) |
+
 ## Parsing
 - `MessageMgr_Get` (0x1C51D0) returns the manager at 0x6B36F8; `gMessageObject` (+0x2C) is its
   message window, and its message set is at +0x38.

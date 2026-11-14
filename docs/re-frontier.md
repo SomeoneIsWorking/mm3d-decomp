@@ -67,10 +67,10 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### message.font — the GZFX font file and what draws its glyphs
 - status: re-partial
 - deps: 
-- evidence: ltn16.gzf parsed from the USA rev 1 RomFS: the header's counts, three sheets whose offsets and 4-bit sizes end at the file's end, 468 glyph entries of 12 bytes that end where the first sheet starts
+- evidence: ltn16.gzf read and written back byte for byte (z3d-mods tools/z3dmods/gzf.py); sheet 0's bytes hash to the A4 texture Azahar dumps at a dialog (510A49A1A046A54B, run txt-dump2); a font drawn from an outline font prints from a texture pack's copies of its sheets (runs txt-mm-r1, txt-mm-r4)
 - where: docs/formats/gzf.md
-- gap: the sheets' pixel order and each glyph's rectangle; the header's cell measures; the loader at the GZFX literal (0x133A2C) and the function that draws a glyph are unread, so whether the three sheets reach the GPU as textures a pack can replace is unknown; GMSG is not decoded
-- notes: z3d-mods wants message text drawn from an outline font (its docs/plans/pc-controls-hud.md)
+- gap: the function that draws a glyph; the header's 11 and 5; sheets 1 and 2 were not seen drawn
+- notes: 
 
 ### ui.screen — which touch screen is up
 - status: re-partial
