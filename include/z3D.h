@@ -121,13 +121,64 @@ typedef struct CsCmdActorCue {
 #define CS_TEXT_TYPE_BOSSES_REMAINS 4
 #define CS_TEXT_TYPE_ALL_NORMAL_MASKS 5
 
+typedef struct Vec3f {
+    /* 0x0 */ float x;
+    /* 0x4 */ float y;
+    /* 0x8 */ float z;
+} Vec3f; // size = 0xC
+
+typedef struct PosRot {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ int16_t rot[3];
+} PosRot; // size = 0x14
+
+// The start of every actor (docs/actors.md); the names are the N64 game's.
+typedef struct Actor {
+    /* 0x000 */ int16_t id; // 0 is the player
+    /* 0x002 */ uint8_t category; // ACTORCAT_*
+    /* 0x003 */ int8_t room;
+    /* 0x004 */ uint32_t flags;
+    /* 0x008 */ PosRot home;
+    /* 0x01C */ char unk_01C[0x8];
+    /* 0x024 */ PosRot world;
+    /* 0x038 */ char unk_038[0x4];
+    /* 0x03C */ PosRot focus;
+    /* 0x050 */ char unk_050[0x8];
+    /* 0x058 */ Vec3f scale;
+    /* 0x064 */ Vec3f velocity;
+    /* 0x070 */ float speed;
+    /* 0x074 */ float gravity;
+    /* 0x078 */ float terminalVelocity;
+    /* 0x07C */ char unk_07C[0x90];
+    /* 0x10C */ Vec3f prevPos; // world.pos before this frame's update
+    /* 0x118 */ char unk_118[0x1C];
+    /* 0x134 */ struct Actor* next; // in its category's list
+} Actor; // size = 0x138 (at least)
+
+// One actor category's list (docs/actors.md).
+typedef struct ActorListEntry {
+    /* 0x0 */ int32_t length;
+    /* 0x4 */ struct Actor* head;
+    /* 0x8 */ char unk_8[0x4];
+} ActorListEntry; // size = 0xC
+
+#define ACTORCAT_PLAYER 2
+#define ACTORCAT_COUNT 12
+
+typedef struct ActorContext {
+    /* 0x00 */ char unk_00[0x10];
+    /* 0x10 */ ActorListEntry actorLists[ACTORCAT_COUNT];
+} ActorContext; // size = 0xA0 (at least)
+
 typedef struct PlayState {
     /* 0x0000 */ char unk_0000[0x30];
     /* 0x0030 */ uint32_t buttonsHeld; // pad bits; bit 12 passes through from the pad
     /* 0x0034 */ uint32_t buttonsPressed; // pressed this frame; bit 3 is Start
     /* 0x0038 */ char unk_0038[0x110];
     /* 0x0148 */ int16_t sceneNum;
-    /* 0x014A */ char unk_014A[0x22DE];
+    /* 0x014A */ char unk_014A[0x1F66];
+    /* 0x20B0 */ ActorContext actorCtx;
+    /* 0x2150 */ char unk_2150[0x2D8];
     /* 0x2428 */ CutsceneContext csCtx;
     /* 0x2690 */ char unk_2690[0x5990];
     /* 0x8020 */ char msgCtx[0x4509];

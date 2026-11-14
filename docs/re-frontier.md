@@ -87,3 +87,10 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - where: docs/items.md
 - gap: the writer is not found. Leads from the code: 0x60415C is a state handler that calls 0x1AF034, 0x1C48AC, 0x1C92A8 and 0x1C9F20 and then copies SaveData (0x1A88 bytes) to gCommonData + 0x1A90; 0x1AFCC0 copies it back; 0x15E870 fills a new file's player, equipment and inventory from defaults
 - notes: z3d-mods puts the first item page back when a text box opens instead of hooking the writer
+
+### actors.player — the actor lists and the player's position
+- status: re-verified
+- deps: none
+- evidence: Actor_UpdateAll (0x174640) walks ctx + 0x14 + category * 0xC and copies +0x24 to +0x10C; live in South Clock Town the first actor of category 2 has id 0, home and world (-281, 0, -700), and a position written to home, world and prevPos moves Link
+- where: docs/actors.md
+- gap: the rest of Actor (bgCheckFlags, floor height, shape) and the Player fields past it
