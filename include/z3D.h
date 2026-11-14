@@ -33,7 +33,12 @@ typedef struct SaveData {
     /* 0x0018 */ uint16_t time; // 0x4000 is 6:00, 0xC000 is 18:00
     /* 0x001A */ char unk_001A[0x4];
     /* 0x001E */ uint8_t playerForm; // PLAYER_FORM_*
-    /* 0x001F */ char unk_001F[0x12B];
+    /* 0x001F */ char unk_001F[0x113];
+    /* 0x0132 */ uint16_t healthCapacity; // 0x10 a heart
+    /* 0x0134 */ uint16_t health;
+    /* 0x0136 */ char unk_0136[0x2];
+    /* 0x0138 */ uint16_t rupees;
+    /* 0x013A */ char unk_013A[0x10];
     /* 0x014A */ EquipmentData equipment;
     /* 0x0174 */ uint8_t items[24]; // by slot; the mask slots follow
     /* 0x018C */ uint8_t masks[24];
@@ -213,6 +218,62 @@ typedef struct UiScreenContext {
     /* 0x08 */ void* activeScreen; // the gUiScreens entry that is up
     /* 0x0C */ char unk_0C[0x4];
 } UiScreenContext; // size = 0x10 (at least)
+
+// BgCheck_Allocate's budget for a scene's static collision (docs/formats/scene_files.md).
+#define BGCHECK_SUBDIV_OVERLAP 50
+#define BGCHECK_SUBDIV_MIN 150
+#define BGCHECK_LOOKUP_SIZE 6
+#define BGCHECK_SSNODE_SIZE 4
+#define BGCHECK_SSNODE_NULL 0xFFFF
+#define BGCHECK_POLY_ID_MAX 0x7FFF
+#define BGCHECK_DYNA_POLY_SIZE 20
+#define BGCHECK_DYNA_VTX_SIZE 6
+#define BGCHECK_CONTEXT_SIZE 0x1600
+#define BGCHECK_MEMSIZE 0x40000
+// The scenes of sBgCheckSpotScenes.
+#define BGCHECK_SPOT_SUBDIV_XZ 32
+#define BGCHECK_SPOT_SUBDIV_Y 8
+#define BGCHECK_SPOT_DYNA_NODES 1000
+#define BGCHECK_SPOT_DYNA_POLYS 512
+#define BGCHECK_SPOT_DYNA_VTX 512
+// Every other scene; sBgCheckSceneDyna and sBgCheckSceneSubdiv name the exceptions.
+#define BGCHECK_SUBDIV_XZ 16
+#define BGCHECK_SUBDIV_Y 4
+#define BGCHECK_DYNA_NODES 1000
+#define BGCHECK_DYNA_POLYS 600
+#define BGCHECK_DYNA_VTX 600
+
+#define BGCHECK_SPOT_SCENE_COUNT 1
+#define BGCHECK_SCENE_DYNA_COUNT 1
+#define BGCHECK_SCENE_SUBDIV_COUNT 3
+
+typedef struct BgCheckSceneDyna {
+    /* 0x00 */ int16_t sceneId;
+    /* 0x02 */ int16_t polyNodesMax;
+    /* 0x04 */ int16_t polyListMax;
+    /* 0x06 */ int16_t vtxListMax;
+} BgCheckSceneDyna; // size = 0x8
+
+typedef struct BgCheckSceneSubdiv {
+    /* 0x00 */ int16_t sceneId;
+    /* 0x02 */ int16_t subdivAmount[3];
+    /* 0x08 */ int32_t nodeListMax;
+} BgCheckSceneSubdiv; // size = 0xC
+
+extern int16_t sBgCheckSpotScenes[BGCHECK_SPOT_SCENE_COUNT]; // 0x0065C330
+extern BgCheckSceneDyna sBgCheckSceneDyna[BGCHECK_SCENE_DYNA_COUNT]; // 0x0065C332
+extern BgCheckSceneSubdiv sBgCheckSceneSubdiv[BGCHECK_SCENE_SUBDIV_COUNT]; // 0x0065C3EC
+
+// Scene files by scene id.
+#define SCENE_TABLE_COUNT 117
+
+typedef struct SceneTableEntry {
+    /* 0x00 */ char unk_00[0x8];
+    /* 0x08 */ char infoPath[0x34];
+    /* 0x3C */ char archivePath[0x34];
+} SceneTableEntry; // size = 0x70
+
+extern SceneTableEntry gSceneTable[SCENE_TABLE_COUNT]; // 0x0069B340
 
 extern CommonData gCommonData; // 0x007751D8
 extern PlayState* gPlayState; // 0x00667890
