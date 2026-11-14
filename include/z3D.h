@@ -61,7 +61,9 @@ typedef struct SaveData {
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene
     /* 0x00008 */ SaveData save;
-    /* 0x01A90 */ char unk_01A90[0x11B8C];
+    /* 0x01A90 */ char unk_01A90[0x1A90];
+    /* 0x03520 */ uint8_t motionOff; // the Motion Controls option: 0 is on (docs/motion.md)
+    /* 0x03521 */ char unk_03521[0x100FB];
     /* 0x1361C */ int32_t setup; // 1 on the title screen, 0 in play
     /* 0x13620 */ char unk_13620[0x120];
     /* 0x13740 */ uint8_t buttonStatus[9]; // by EQUIP_BUTTON_*: BUTTON_ENABLED or BUTTON_DISABLED, set every frame
@@ -350,6 +352,41 @@ typedef struct PlayHud {
 #define ITEM_ICON_NONE 0xFF
 #define ITEM_ICON_COUNT 0xA0
 
+// The game's view of the gyroscope (docs/motion.md). Angles are degrees since the last reset.
+typedef struct MotionState {
+    /* 0x00 */ void* reader; // the SDK's GyroscopeReader, GYRO_READER_*
+    /* 0x04 */ float pitch;
+    /* 0x08 */ float yaw;
+    /* 0x0C */ float roll; // always 0
+    /* 0x10 */ float direction[3]; // pitch, yaw, roll of the reader's direction matrix
+    /* 0x1C */ float unwrapped[3];
+    /* 0x28 */ float previous[3];
+    /* 0x34 */ float reference[3];
+    /* 0x40 */ float yawScale; // 2.1: view degrees per degree of the 3DS
+    /* 0x44 */ float pitchScale; // 1.46
+    /* 0x48 */ uint8_t reset; // asks Motion_Update for a new reference
+    /* 0x49 */ uint8_t resetDone; // for the frame the reference was taken
+    /* 0x4A */ uint8_t valid;
+} MotionState; // size = 0x4C
+
+// MotionState.reader. Speeds are in units of 360 degrees a second.
+#define GYRO_READER_SPEED 0x7E0 // float[3]
+#define GYRO_READER_ANGLE 0x7EC // float[3], turns
+#define GYRO_READER_DIRECTION 0x7F8 // float[9], rows are the 3DS's axes
+#define GYRO_READER_ZERO_PLAY_ON 0x854 // u8
+#define GYRO_READER_ZERO_DRIFT_ON 0x855 // u8
+#define GYRO_READER_REVISE_ON 0x856 // u8: the accelerometer pulls the direction toward gravity
+#define GYRO_READER_ZERO_PLAY 0x858 // float
+#define GYRO_READER_DRIFT_BIAS 0x8A0 // float[3], raw units
+
+// The player's look in first person and with an aimed item (Player_UpdateLook).
+#define PLAYER_STATE_FLAGS_1 0x11DB0 // u32
+#define PLAYER_STATE1_FIRST_PERSON 0x100000
+#define PLAYER_LOOK_BASE 0x125B8 // s16[3]: focus.rot at the last motion reset
+#define PLAYER_LOOK_FLAGS 0x129BC // u32: bit 0, the gyroscope sets focus.rot
+#define PLAYER_PAD 0x129CC // pointer to the pad state the player reads
+
+extern MotionState gMotionState; // 0x006B1DF4
 extern UiLayout* gUiCommonLayouts[UI_LAYOUT_COUNT]; // 0x006B7B8C
 extern uint8_t sItemIconFrames[ITEM_ICON_COUNT]; // 0x006562F0
 extern CommonData gCommonData; // 0x007751D8

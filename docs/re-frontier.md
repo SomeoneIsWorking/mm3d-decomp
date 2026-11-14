@@ -116,3 +116,13 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - evidence: PlayHud_Draw (0x195478) and MainScreen_Draw (0x59B27C) decompiled; PlayHud's root widget, its A button widget and the touch panel's root widget hidden live by their flags (mmre-hud5 to mmre-hud7)
 - where: docs/hud.md, include/z3D.h, symbols/functions.csv
 - gap: the clock's own widget; a code patch seen working; dialog boxes with the HUD hidden
+
+## motion
+
+### motion.look — what the first-person look reads of the gyroscope
+- status: re-partial
+- deps: actors.player
+- evidence: Motion_Update, Player_UpdateLook and the SDK reader decompiled; in first person the reader's angle, gMotionState and focus.rot read live against a fed rate: 2.10 view degrees a degree of yaw, 1.46 of pitch; the accelerometer revise, zero play, zero drift and motionOff each switched live (z3d-mods runs gyro-mm2 to gyro-mm7)
+- where: docs/motion.md, include/z3D.h, symbols/functions.csv
+- gap: aimed items not run; what sets bit 1 of the look flags; the pad look's invert byte
+- notes: 

@@ -1,4 +1,14 @@
 vaddr,name
+00105670,Motion_Init
+0010852c,GyroscopeReader_EnableZeroPlay
+00108538,GyroscopeReader_EnableZeroDrift
+00114518,GyroscopeReader_Read
+00114644,GyroscopeReader_SetZeroDriftMode
+00114898,GyroscopeReader_Reset
+00121fb0,GyroscopeReader_ReadLocal
+0012e10c,GyroscopeReader_UpdateDirection
+0012e2d8,GyroscopeReader_CalculateAxis
+0012e494,GyroscopeReader_ReviseDirection
 0016ebac,func_0016EBAC
 001707cc,func_001707CC
 0017419c,Cutscene_BeginScript
@@ -11,6 +21,12 @@ vaddr,name
 001b4ee8,Save_Checksum
 001c5018,Message_GetState
 001ef228,Message_CloseTextbox
+001f59c8,Motion_Get
+002118c8,Player_ResetLook
+00219610,Motion_Update
+0021c5ac,Player_UpdateLook
+002232f8,Motion_GetLook
+00228e5c,Motion_Reset
 0029b738,BgCheck_Allocate
 002b8c64,BgCheck_InitializeStaticLookup
 00317000,Play_SaveAtStatue
