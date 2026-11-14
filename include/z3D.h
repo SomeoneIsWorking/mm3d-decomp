@@ -81,6 +81,10 @@ typedef struct SaveData {
     /* 0x1A54 */ char unk_1A54[0x34];
 } SaveData; // size = 0x1A88
 
+// The final hours: from midnight of the last day, SaveData.day, until the moon falls at dawn.
+#define FINAL_DAY 3
+#define CLOCK_TIME_DAWN 0x4000
+
 // SaveData.questItems: the songs, in the song table's order from the Sonata of Awakening; the
 // Song of Time is the seventh. The Goron Lullaby's intro has its own bit.
 #define QUEST_SONG_FIRST 6
@@ -90,7 +94,11 @@ typedef struct SaveData {
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene
     /* 0x00008 */ SaveData save;
-    /* 0x01A90 */ char unk_01A90[0x1A90];
+    /* 0x01A90 */ char unk_01A90[0x1A88];
+    /* 0x03518 */ uint32_t entrance; // the scene's entrance in play; on load, where the file starts
+    /* 0x0351C */ uint16_t statueEntrance; // where a statue save loads (docs/save.md)
+    /* 0x0351E */ uint8_t statueSave; // the file was saved at a statue: its load resumes the cycle
+    /* 0x0351F */ char unk_0351F[0x1];
     /* 0x03520 */ uint8_t motionOff; // the Motion Controls option: 0 is on (docs/motion.md)
     /* 0x03521 */ char unk_03521[0x100FB];
     /* 0x1361C */ int32_t setup; // 1 on the title screen, 0 in play
@@ -221,6 +229,21 @@ typedef struct ActorContext {
     /* 0x10 */ ActorListEntry actorLists[ACTORCAT_COUNT];
 } ActorContext; // size = 0xA0 (at least)
 
+// Writes a built file to save<n>.bin as a job; SaveFile_UpdateWrite frees the job once done.
+typedef struct SaveWriter {
+    /* 0x00 */ void* job;
+    /* 0x04 */ char unk_04[0x4];
+    /* 0x08 */ void* buffer; // the file's 0x13618 bytes
+    /* 0x0C */ char unk_0C[0x4];
+    /* 0x10 */ int16_t state; // SAVE_WRITER_*
+    /* 0x12 */ char unk_12[0x2];
+} SaveWriter; // size = 0x14
+
+#define SAVE_WRITER_IDLE 0
+#define SAVE_WRITER_WRITING 2
+// An entrance is scene << 9 | spawn << 4 | layer; a statue's entrance has layer 0.
+#define ENTRANCE_LAYER_MASK 0xF
+
 typedef struct PlayState {
     /* 0x0000 */ char unk_0000[0x30];
     /* 0x0030 */ uint32_t buttonsHeld; // pad bits; bit 12 passes through from the pad
@@ -234,7 +257,9 @@ typedef struct PlayState {
     /* 0x20B0 */ ActorContext actorCtx;
     /* 0x2150 */ char unk_2150[0x2D8];
     /* 0x2428 */ CutsceneContext csCtx;
-    /* 0x2690 */ char unk_2690[0x5990];
+    /* 0x2690 */ char unk_2690[0x155C];
+    /* 0x3BEC */ SaveWriter saveWriter; // a statue's save (docs/save.md)
+    /* 0x3C00 */ char unk_3C00[0x4420];
     /* 0x8020 */ char msgCtx[0x62A];
     /* 0x864A */ uint16_t aButtonDoAction; // DO_ACTION_*: the A button's word (docs/hud.md)
     /* 0x864C */ char unk_864C[0x26];

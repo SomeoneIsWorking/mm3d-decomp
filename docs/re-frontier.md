@@ -118,7 +118,8 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - evidence: Play_SaveAtStatue hooked at its entry; a save at South Clock Town's owl statue writes save0.bin with the equipment as RAM held it, and the file loads in the game without the hook (z3d-mods runs mm-sv-held, mm-sv-rel, mm-ld-plain)
 - where: docs/save.md, symbols/functions.csv
 - gap: 
-- notes: the writer object at PlayState + 0x3BEC and the job it queues are unnamed
+- evidence: the writer (PlayState.saveWriter) and CommonData.entrance / statueEntrance / statueSave read live: a statue save made from our patch at each scene's entrance writes save0.bin with statueSave 1 and that entrance, the writer's job is freed after each of 29 writes, and the file loads at that entrance with the saved clock (z3d-mods runs mm-q-as1, mm-q-as3, inputtest autosave-mm3d)
+- notes: the cycle save at 0x188270 (statueSave 0) is read, not run; the job's own type is unnamed
 
 ### actors.player — the actor lists, the player's position and the view
 - status: re-verified
