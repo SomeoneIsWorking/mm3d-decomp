@@ -554,13 +554,13 @@ typedef struct LayoutDrawManager {
 typedef struct QuadBatch {
     /* 0x000 */ char unk_000[0x2B8];
     /* 0x2B8 */ Vec3f* positions;
-    /* 0x2BC */ float (*rotations)[12];
+    /* 0x2BC */ float* rotations; // 12 a quad: three rows of four
     /* 0x2C0 */ Vec3f* sizes;
     /* 0x2C4 */ uint32_t capacity;
     /* 0x2C8 */ uint32_t count;
     /* 0x2CC */ Vec3f corners[4];
     /* 0x2FC */ char unk_2FC[0x9C];
-    /* 0x398 */ float (*colors)[16]; // four RGBA corners a quad, or none
+    /* 0x398 */ float* colors; // 16 a quad: four RGBA corners, or none
 } QuadBatch; // size = 0x39C (at least)
 
 // sItemIconFrames: no icon.
