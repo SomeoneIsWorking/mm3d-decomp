@@ -31,8 +31,7 @@ write and the next frame. A fresh file reads `healthCapacity` 0x30, `health` 0x3
 `rupees` 0, `upgrades` 0x00120000.
 
 Not found: the magic capacity (the word at `gCommonData` + 0x368A reads 0x30 and is written back by
-the game; the fill of a double meter was not measured), `SaveData` + 0x136 (no effect seen), the
-powder keg's count (not in `ammo`).
+the game; the fill of a double meter was not measured), `SaveData` + 0x136 (no effect seen).
 
 ## Writing a button's item by hand
 `equipment.buttonItems[0]` is what the HUD and a button's use read, and `buttonSlots[0]` the
@@ -49,7 +48,9 @@ the cursor on that button (hud-mmlive3).
 capacity of the item's upgrade: the bow's is the quiver (`UPGRADE_QUIVER` 0), bombs' and
 bombchus' the bomb bag (1), sticks' 6 and nuts' 7. The capacity is
 `gUpgradeCapacities[upgrade][(SaveData.upgrades & gUpgradeMasks[upgrade]) >> gUpgradeShifts[upgrade]]`.
-Beans (item 0xA) are not clamped and the powder keg (0xC) is kept at 0 or 1.
+Beans (item 0xA) are not clamped and the powder keg (0xC) is kept at 0 or 1. The ice and light
+arrows (3, 4) count the bow's; the item ids are `ITEM_*` in z3D.h (z3d-mods hudfull1: the keg's 1,
+30 ice arrows full in a 30 quiver, 5 light arrows, 20 beans, each on Y).
 
 | Upgrade | Mask | Shift | Capacities (u16, levels 0 to 3) |
 |---|---|---|---|

@@ -13,7 +13,15 @@
 #define EQUIP_BUTTON_II 4
 #define ITEM_OCARINA 0x00
 #define ITEM_BOW 0x01
+#define ITEM_ARROW_FIRE 0x02
+#define ITEM_ARROW_ICE 0x03
+#define ITEM_ARROW_LIGHT 0x04
 #define ITEM_BOMB 0x06
+#define ITEM_BOMBCHU 0x07
+#define ITEM_DEKU_STICK 0x08
+#define ITEM_DEKU_NUT 0x09
+#define ITEM_MAGIC_BEANS 0x0A
+#define ITEM_POWDER_KEG 0x0C
 #define ITEM_BOTTLE 0x12 // empty
 #define ITEM_MASK_BUNNY 0x39
 #define ITEM_NONE 0xFF
