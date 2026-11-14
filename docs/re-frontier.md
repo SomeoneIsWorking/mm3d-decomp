@@ -147,7 +147,7 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### hud.state — what the HUD reads
 - status: re-partial
 - deps: items.buttons
-- evidence: health, heart containers, magic, rupees, the wallet bits, ammo by item id, time and day written live and read off the game's HUD; sItemIconFrames read live and matched against icon_item_menu00's sheet through item ids on the I and II buttons (z3d-mods runs mmre-save1, mmre-hud2 to mmre-hud4)
+- evidence: health, heart containers, magic, rupees, the wallet bits, ammo by item id, small keys by dungeon, time and day written live and read off the game's HUD; sItemIconFrames read live and matched against icon_item_menu00's sheet through item ids on the I and II buttons (z3d-mods runs mmre-save1, mmre-hud2 to mmre-hud4, mmkeys2, mmkeys5)
 - where: docs/hud.md, include/z3D.h
 - gap: magic capacity and the fill of a double meter; buttonStatus seen once, never written; the A label's text number to label; the minimap; the powder keg's count
 

@@ -74,7 +74,9 @@ typedef struct SaveData {
     /* 0x01BB */ char unk_01BB[0x31];
     /* 0x01EC */ uint32_t upgrades; // UPGRADE_WALLET_*
     /* 0x01F0 */ uint32_t questItems; // QUEST_*; bit 18: the Bombers' Notebook
-    /* 0x01F4 */ char unk_01F4[0x1054];
+    /* 0x01F4 */ uint8_t dungeonItems[10];
+    /* 0x01FE */ int8_t dungeonKeys[9]; // by DUNGEON_INDEX_*; -1 none yet
+    /* 0x0207 */ char unk_0207[0x1041];
     /* 0x1248 */ uint8_t weekEventReg[100]; // flag n is byte n / 8, bit n % 8
     /* 0x12AC */ char unk_12AC[0x77C];
     /* 0x1A28 */ uint8_t itemGrid[20]; // the Items screen's cells, five to a row: an inventory slot
@@ -458,6 +460,17 @@ extern SceneTableEntry gSceneTable[SCENE_TABLE_COUNT]; // 0x0069B340
 #define UPGRADE_STICKS 6
 #define UPGRADE_NUTS 7
 #define UPGRADE_COUNT 8
+
+// SaveData.dungeonKeys' index, and the scenes of each dungeon (PlayState.sceneNum).
+#define DUNGEON_INDEX_WOODFALL_TEMPLE 0
+#define DUNGEON_INDEX_SNOWHEAD_TEMPLE 1
+#define DUNGEON_INDEX_GREAT_BAY_TEMPLE 2
+#define DUNGEON_INDEX_STONE_TOWER_TEMPLE 3
+#define SCENE_WOODFALL_TEMPLE 0x1B
+#define SCENE_SNOWHEAD_TEMPLE 0x21
+#define SCENE_GREAT_BAY_TEMPLE 0x49
+#define SCENE_STONE_TOWER_TEMPLE 0x16
+#define SCENE_STONE_TOWER_TEMPLE_INVERTED 0x18
 #define UPGRADE_LEVELS 4
 // PlayState.aButtonDoAction: a word cell of the action sheet, or none (docs/hud.md).
 #define DO_ACTION_NONE 10
