@@ -125,7 +125,8 @@ state's +0x13D is 4, and it calls `Minimap_Draw` (0x36DEBC). That fills the quad
 the markers) with screen-space quads and queues them on `gLayoutDrawManager`'s
 `LAYOUT_DRAW_QUEUE_TOUCH`; the frame draws each queue in ascending priority. A batch moved to
 `LAYOUT_DRAW_QUEUE_TOP` after the call, its positions and sizes rescaled, draws on the top screen
-(z3d-mods `patch/mm3d/minimap.cpp`; live: South Clock Town, Termina Field and Woodfall Temple, mmmap3, mmmap7).
+A quad's extent is its four `corners` times `sizes[i]`, turned by the first three floats of each
+row of `rotations[i]`, plus `positions[i]` (z3d-mods `patch/mm3d/minimap.cpp` fits the rooms' extent to a box; live: South Clock Town, Termina Field and Woodfall Temple, mmmap3, mmmap7).
 
 The map data loads in every scene that has one (the header at `*0x6890F4`, written by 0x4BD4C8 and
 0x4BD504 on a scene change, mmmap5); the room index is the state's +0x54. The rooms are drawn only
