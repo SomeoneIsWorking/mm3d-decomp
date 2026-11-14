@@ -37,8 +37,10 @@ Soaring, Storms and the Sun's (the names from the N64 game's order; the bytes ar
 Live: the Song of Time's six notes, each held four frames with four empty ones between, are
 recognised ("You played the Song of Time!") and the game returns to the first day (ctl-mm8). The
 same song played by hand on the buttons in the same file does the same, with no question asked
-first (ctl-mm9).
+first (ctl-mm9). After the return the game asks "Do you want to save?" with Yes and No
+(ctl-pad2).
 
 ## Not done
 - No other song was played this way.
-- The Song of Time's question was not seen in this file, played either way.
+- No question before the return was seen in this file, played either way; a file further into
+  the game was not tried.
