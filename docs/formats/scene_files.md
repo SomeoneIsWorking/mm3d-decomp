@@ -33,6 +33,31 @@ The static collision context is at `PlayState +0xAB0`, laid out as OoT3D's (deco
 `docs/notes/scene_collision.md`): the node list's length is the u16 at +0x44 (57319 in South
 Clock Town), the nodes used the u16 at +0x46.
 
+### The room a scene's collision gets (BgCheck_Allocate, 0x29B738)
+Scene command 0x03 (`Scene_CommandCollisionHeader`, 0x48ABD0) calls it; the names are in
+`include/z3D.h`. Every scene gets 0x40000 bytes.
+
+| Scene | Cells x, y, z | Moving collision: nodes, triangles, vertices |
+|---|---|---|
+| `sBgCheckSpotScenes` (0x65C330): 53 | 32, 8, 32 | 1000, 512, 512 |
+| every other | 16, 4, 16, or `sBgCheckSceneSubdiv`'s (0x65C3EC) | 1000, 600, 600, or `sBgCheckSceneDyna`'s (0x65C332) |
+
+- `sBgCheckSceneSubdiv`: scene 45 36, 1, 36; scenes 55 and 56 40, 1, 40; each with a list
+  length of -1 (none of its own). `sBgCheckSceneDyna`: scene 70 1000, 600, 512.
+- The node list gets what the rest leaves:
+  `(0x40000 - cells * 6 - triangles - nodes * 4 - triangles' * 20 - vertices' * 6 - 0x1600) / 4`,
+  the primed counts the moving collision's: 57692 less a quarter of the scene's triangles
+  with the usual grid. `BgCheck_InitializeStaticLookup` (0x2B8C64) fills it as OoT3D's does
+  (cells at least 150 long, grown by 50), and `StaticLookup_AddPolyToSSList` (0x43A950) takes
+  a node without looking at the length, so a scene that needs more writes past its list.
+- The scene table `gSceneTable` (0x69B340) has 117 entries of 0x70 bytes, the scene file's
+  path at +0x08 and its archive's at +0x3C; the index is the scene id (45 `z2_00keikoku`,
+  111 `z2_clocktower`).
+- These addresses are the 1.0 layout's. In the USA Rev 1 ROM the routine is at 0x29B5D4 and
+  the command at 0x48AD28; the tables are at the same addresses.
+- By the count of triangle and cell pairs that touch, every scene of the ROM fits: the
+  fullest is `z2_hakugin`, 28971 of 55695.
+
 Corner flags: bit 0x4000 of the first corner (the value 2 in its top three bits) lets actors
 through the triangle, as the N64 games' `COLPOLY_IGNORE_ENTITY`. Shown in game: 12 upright
 triangles 10 units high across the Milk Bar's stairs stop Link into a hop three steps at a time

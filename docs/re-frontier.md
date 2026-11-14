@@ -94,3 +94,11 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - evidence: Actor_UpdateAll (0x174640) walks ctx + 0x14 + category * 0xC and copies +0x24 to +0x10C; live in South Clock Town the first actor of category 2 has id 0, home and world (-281, 0, -700), and a position written to home, world and prevPos moves Link; z3d-mods' walk step steers him by PlayState's view eye and look-at (+0x220, +0x22C)
 - where: docs/actors.md
 - gap: the rest of Actor (bgCheckFlags, floor height, shape) and the Player fields past it; the camera structures behind the view
+
+### collision.budget — what BgCheck_Allocate gives a scene
+- status: re-partial
+- deps: none
+- evidence: disassembly of BgCheck_Allocate (0x29B738) from scene command 0x03 (0x48ABD0), its three tables and StaticLookup_AddPolyToSSList (0x43A950); the list length the formula gives is the one read live in South Clock Town (57319 with 1491 triangles); every ROM scene's triangle and cell pairs fit its list (z3d-mods `bgcheck.py`)
+- where: docs/formats/scene_files.md, include/z3D.h, symbols/functions.csv
+- gap: BgCheck_InitializeStaticLookup's triangle and cell test is not decompiled (z3d-mods counts the pairs that touch); a scene past its list was not run; the moving collision's lists are unread
+- notes: 

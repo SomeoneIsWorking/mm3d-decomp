@@ -8,8 +8,12 @@ vaddr,name
 001b4ee8,Save_Checksum
 001c5018,Message_GetState
 001ef228,Message_CloseTextbox
+0029b738,BgCheck_Allocate
+002b8c64,BgCheck_InitializeStaticLookup
 00317000,Play_SaveAtStatue
 00346ab0,SaveFile_Load
 003f1a4c,CutsceneHandler_RunScript
+0043a950,StaticLookup_AddPolyToSSList
 0043e818,SaveFile_StartWriteSlot
+0048abd0,Scene_CommandCollisionHeader
 004cf9c4,CutsceneHandler_StartScript
