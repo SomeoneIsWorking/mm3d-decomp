@@ -24,3 +24,11 @@ A file is the first 0x13618 bytes of `gCommonData` (0x7751D8), written whole to 
   `save0.bin` (79384 bytes) holds `SaveData.equipment` at 0x152 as RAM had it.
 - Two files saved from the same steps in two runs differ only in the 20 bytes at 0x1380 (small random digits that differ from run to run), their copy at 0x2E08, the checksum at 0x1A88 and the
   clock's seconds at 0x352B.
+
+## Unplaced fields, seen by filling them
+Not laid out yet; each was set to 0xFF throughout in a fresh file, in South Clock Town.
+- `SaveData` + 0x124C, 160 bytes: with the notebook owned, its list then holds events ("A Stay
+  at Stock Pot Inn", "Anju's Anguish", ...) with their schedule bars, so the notebook's event
+  flags are in this range.
+- `SaveData` + 0x11B0, 92 bytes: the Map screen then draws Clock Town's map on the touch screen,
+  so the owned-map bits are in this range. The Map of Termina on the top screen stays blank.
