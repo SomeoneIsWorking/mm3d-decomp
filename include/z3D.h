@@ -178,7 +178,10 @@ typedef struct PlayState {
     /* 0x0034 */ uint32_t buttonsPressed; // pressed this frame; bit 3 is Start
     /* 0x0038 */ char unk_0038[0x110];
     /* 0x0148 */ int16_t sceneNum;
-    /* 0x014A */ char unk_014A[0x1F66];
+    /* 0x014A */ char unk_014A[0xD6];
+    /* 0x0220 */ Vec3f viewEye; // where the frame is drawn from (docs/actors.md)
+    /* 0x022C */ Vec3f viewAt; // and the point it looks at
+    /* 0x0238 */ char unk_0238[0x1E78];
     /* 0x20B0 */ ActorContext actorCtx;
     /* 0x2150 */ char unk_2150[0x2D8];
     /* 0x2428 */ CutsceneContext csCtx;

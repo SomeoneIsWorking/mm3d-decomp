@@ -87,3 +87,10 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - where: docs/save.md, symbols/functions.csv
 - gap: 
 - notes: the writer object at PlayState + 0x3BEC and the job it queues are unnamed
+
+### actors.player — the actor lists, the player's position and the view
+- status: re-verified
+- deps: none
+- evidence: Actor_UpdateAll (0x174640) walks ctx + 0x14 + category * 0xC and copies +0x24 to +0x10C; live in South Clock Town the first actor of category 2 has id 0, home and world (-281, 0, -700), and a position written to home, world and prevPos moves Link; z3d-mods' walk step steers him by PlayState's view eye and look-at (+0x220, +0x22C)
+- where: docs/actors.md
+- gap: the rest of Actor (bgCheckFlags, floor height, shape) and the Player fields past it; the camera structures behind the view

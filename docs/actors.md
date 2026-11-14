@@ -17,3 +17,11 @@ USA 1.0 layout. Structures are in `include/z3D.h`.
 - `Actor.textId` (+0x11A, u16) is the message A opens when the actor is checked or spoken to, with
   the N64 game's ids: South Clock Town's owl statue (actor id 0x1B2, category 7) holds 0xC01, its
   save prompt. Written to 0x22 before the check, the statue shows "You got the Hero's Bow!".
+
+## The view
+`PlayState` +0x220 is the eye the frame is drawn from and +0x22C the point it looks at, three
+floats each. Seen in the Astral Observatory (entrance 0x4C10): with Link at (-6, -129, 103) the
+look-at is (-6, -97.2, 103), 31.8 above his feet, and the eye (-6, -80, 166.3) behind him; both
+follow him as he walks. The same two vectors are also at +0x458/+0x464 and +0x920/+0x92C (camera
+structures, not laid out yet). The circle pad moves Link relative to this view: up is away from
+the eye.
