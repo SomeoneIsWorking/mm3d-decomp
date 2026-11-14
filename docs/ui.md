@@ -35,6 +35,8 @@ cutscene after it, South Clock Town, and all the while the Ocarina screen is up)
 frame when a change is asked for (50 on the frame the cutscene ended) and the word at +0x1374E
 counts (11, then 2, then 9 in the same run). Other values have not been seen.
 
+What each value fades and the layouts behind the HUD: docs/hud.md.
+
 ## Main screen buttons
 
 Touch targets on the main screen, in its 320x240 pixels (read from frames and pressed live):

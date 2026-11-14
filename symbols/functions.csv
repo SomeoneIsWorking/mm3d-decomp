@@ -1,10 +1,13 @@
 vaddr,name
 0016ebac,func_0016EBAC
+001707cc,func_001707CC
 0017419c,Cutscene_BeginScript
 00174640,Actor_UpdateAll
+0017ec58,LayoutDrawManager_Draw
 001846b4,Cutscene_ProcessCommands
 0018ad44,SaveFile_UpdateWrite
 0018da50,SaveFile_StartWrite
+00195478,PlayHud_Draw
 001b4ee8,Save_Checksum
 001c5018,Message_GetState
 001ef228,Message_CloseTextbox
@@ -17,3 +20,4 @@ vaddr,name
 0043e818,SaveFile_StartWriteSlot
 0048abd0,Scene_CommandCollisionHeader
 004cf9c4,CutsceneHandler_StartScript
+0059b27c,MainScreen_Draw

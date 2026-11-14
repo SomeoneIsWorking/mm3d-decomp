@@ -36,13 +36,22 @@ typedef struct SaveData {
     /* 0x001F */ char unk_001F[0x113];
     /* 0x0132 */ uint16_t healthCapacity; // 0x10 a heart
     /* 0x0134 */ uint16_t health;
-    /* 0x0136 */ char unk_0136[0x2];
+    /* 0x0136 */ char unk_0136[0x1];
+    /* 0x0137 */ uint8_t magic; // 0x30 fills the single meter
     /* 0x0138 */ uint16_t rupees;
-    /* 0x013A */ char unk_013A[0x10];
+    /* 0x013A */ char unk_013A[0x4];
+    /* 0x013E */ uint8_t magicAcquired; // the meter is drawn
+    /* 0x013F */ uint8_t doubleMagicAcquired; // the meter is twice as long
+    /* 0x0140 */ char unk_0140[0xA];
     /* 0x014A */ EquipmentData equipment;
     /* 0x0174 */ uint8_t items[24]; // by slot; the mask slots follow
     /* 0x018C */ uint8_t masks[24];
-    /* 0x01A4 */ char unk_01A4[0x10A4];
+    /* 0x01A4 */ char unk_01A4[0xC];
+    /* 0x01B0 */ uint8_t ammo[11]; // by item id (docs/hud.md)
+    /* 0x01BB */ char unk_01BB[0x31];
+    /* 0x01EC */ uint32_t upgrades; // UPGRADE_WALLET_*
+    /* 0x01F0 */ uint32_t questItems; // bit 18: the Bombers' Notebook
+    /* 0x01F4 */ char unk_01F4[0x1054];
     /* 0x1248 */ uint8_t weekEventReg[100]; // flag n is byte n / 8, bit n % 8
     /* 0x12AC */ char unk_12AC[0x7DC];
 } SaveData; // size = 0x1A88
@@ -52,7 +61,9 @@ typedef struct CommonData {
     /* 0x00008 */ SaveData save;
     /* 0x01A90 */ char unk_01A90[0x11B8C];
     /* 0x1361C */ int32_t setup; // 1 on the title screen, 0 in play
-    /* 0x13620 */ char unk_13620[0x12A];
+    /* 0x13620 */ char unk_13620[0x120];
+    /* 0x13740 */ uint8_t buttonStatus[9]; // by EQUIP_BUTTON_*: BUTTON_ENABLED or BUTTON_DISABLED, set every frame
+    /* 0x13749 */ char unk_13749[0x1];
     /* 0x1374A */ uint16_t nextHudVisibility; // set for a frame when the HUD is asked to change
     /* 0x1374C */ uint16_t hudVisibility; // HUD_VISIBILITY_*
     /* 0x1374E */ uint16_t hudVisibilityTimer;
@@ -275,6 +286,70 @@ typedef struct SceneTableEntry {
 
 extern SceneTableEntry gSceneTable[SCENE_TABLE_COUNT]; // 0x0069B340
 
+// SaveData.upgrades: the wallet, 0 holds 99 rupees and 1 holds 200.
+#define UPGRADE_WALLET_SHIFT 12
+#define UPGRADE_WALLET_MASK 0x3000
+#define BUTTON_ENABLED 0
+#define BUTTON_DISABLED 0xFF
+
+// A node of a layout's tree (docs/hud.md).
+#define UI_WIDGET_VISIBLE 0x1 // flags
+#define UI_WIDGET_VISIBLE_CHANGED 0x20000 // flags: set by a change; activeFlags: set while visible
+#define UI_WIDGET_FLAGS_HIDDEN 0x0FFFFF0E
+#define UI_WIDGET_ACTIVE_FLAGS_HIDDEN 0x0FFDFF00
+
+typedef struct UiWidget {
+    /* 0x000 */ char unk_000[0x20];
+    /* 0x020 */ struct UiLayout* layout; // the layout a widget stands for, or NULL
+    /* 0x024 */ char unk_024[0x5C];
+    /* 0x080 */ float alpha;
+    /* 0x084 */ uint32_t flags; // UI_WIDGET_*
+    /* 0x088 */ uint32_t activeFlags;
+    /* 0x08C */ char unk_08C[0xB0];
+} UiWidget; // size = 0x13C
+
+typedef struct UiLayout {
+    /* 0x000 */ void* vtable;
+    /* 0x004 */ void* layoutClass;
+    /* 0x008 */ UiWidget root;
+    /* 0x144 */ char unk_144[0x2C];
+} UiLayout; // size = 0x170
+
+// Joker.Main.Play.AActionIcon and BActionIcon.
+typedef struct PlayActionIcon {
+    /* 0x000 */ UiLayout layout;
+    /* 0x170 */ char unk_170[0x20];
+    /* 0x190 */ uint16_t textNum; // the label shown
+} PlayActionIcon; // size = 0x194 (at least)
+
+// Joker.Main.Play.Hud: the top screen's clock and action buttons.
+typedef struct PlayHud {
+    /* 0x000 */ UiLayout layout;
+    /* 0x170 */ UiWidget* chatAlert;
+    /* 0x174 */ UiWidget* eventTimer;
+    /* 0x178 */ UiWidget* gyroGroup;
+    /* 0x17C */ UiWidget* shootingFrame;
+    /* 0x180 */ UiWidget* aActionButton;
+    /* 0x184 */ UiWidget* bActionButton;
+    /* 0x188 */ char unk_188[0x20];
+    /* 0x1A8 */ PlayActionIcon* aActionIcon;
+    /* 0x1AC */ PlayActionIcon* bActionIcon;
+    /* 0x1B0 */ char unk_1B0[0x80];
+    /* 0x230 */ float opacity; // set every frame; PlayHud_Draw draws nothing at 0
+} PlayHud; // size = 0x234 (at least)
+
+// gUiCommonLayouts.
+#define UI_LAYOUT_TOUCH_PANEL 0 // Joker.Main.Play.TouchPanel: the main touch screen's HUD
+#define UI_LAYOUT_BACKGROUND 1
+#define UI_LAYOUT_HUD 2 // PlayHud
+#define UI_LAYOUT_COUNT 49
+
+// sItemIconFrames: no icon.
+#define ITEM_ICON_NONE 0xFF
+#define ITEM_ICON_COUNT 0xA0
+
+extern UiLayout* gUiCommonLayouts[UI_LAYOUT_COUNT]; // 0x006B7B8C
+extern uint8_t sItemIconFrames[ITEM_ICON_COUNT]; // 0x006562F0
 extern CommonData gCommonData; // 0x007751D8
 extern PlayState* gPlayState; // 0x00667890
 extern UiScreenContext gUiScreenContext; // 0x0072F5BC
