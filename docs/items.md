@@ -39,6 +39,9 @@ pressed this frame. Bit 12, which no 3DS button sets, arrives there unchanged.
 ctl-mm6): item 0x12 written to slot 48 shows as an empty bottle in the Items screen's fourth
 cell of the third row.
 
+Live (z3d-mods run ctl-mask1): 0x39 (`ITEM_MASK_BUNNY`, the N64's id) written to slot 32
+(`SLOT_MASK_BUNNY`) shows the Bunny Hood in the Masks screen's second row, third cell.
+
 `SaveData.itemGrid` (+0x1A28, 20 bytes, five to a row) and `maskGrid` (+0x1A3C, 24 bytes, six to
 a row; read from the disassembly, not seen) hold each cell's slot. A new file's item grid reads
 1 2 3 4 6, 7 8 9 10 12, 14 15 16 48 49, 50 to 54: the ocarina's slot 0 is not in it.
