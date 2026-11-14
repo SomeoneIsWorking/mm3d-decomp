@@ -25,3 +25,10 @@ look-at is (-6, -97.2, 103), 31.8 above his feet, and the eye (-6, -80, 166.3) b
 follow him as he walks. The same two vectors are also at +0x458/+0x464 and +0x920/+0x92C (camera
 structures, not laid out yet). The circle pad moves Link relative to this view: up is away from
 the eye.
+
+The ocarina's camera faces Link from the front, and the view picks up from there once he puts
+it away: in South Clock Town with Link at (-277, 100, -1630) facing -z the eye is 154 behind him
+before, at (-261, 110, -1673) while he plays, and then eases out along that line to
+(-229, 114, -1756), 126 in front of him, where it stays until he walks; then it swings behind.
+Link's position and yaw do not change. Seen with Project Restoration alone and with our patch
+on it; the vanilla 1.1 code was not run (our addresses are for Project Restoration's bake).
