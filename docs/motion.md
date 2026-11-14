@@ -108,6 +108,11 @@ old ones; they are 0 from the next `Motion_Update`.
 `focus.rot` is the base plus the angle times the scale in 65536ths of a turn, cut to whole
 units, and held at +-14000 units of pitch (76.9 degrees) in first person.
 
+What tells an aimed item from the plain look is `stateFlags1`: 0x100000 in the plain look and
+0x100008 with the bow aimed, drawn and after the arrow has left (z3d-mods run `pol-flags-mm`,
+South Clock Town; `PLAYER_STATE1_ITEM_AIMED`). The bow fires when its button is let go; R does
+not fire it.
+
 ## Seen in the running game
 
 South Clock Town, first person, the app's harness. The emulator scales the rate it is given by

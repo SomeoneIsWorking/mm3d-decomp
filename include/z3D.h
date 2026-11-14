@@ -554,6 +554,7 @@ typedef struct MotionState {
 // The player's look in first person and with an aimed item (Player_UpdateLook).
 #define PLAYER_STATE_FLAGS_1 0x11DB0 // u32
 #define PLAYER_STATE1_FIRST_PERSON 0x100000
+#define PLAYER_STATE1_ITEM_AIMED 0x8 // an item is aimed (the bow); clear in the plain look
 #define PLAYER_LOOK_BASE 0x125B8 // s16[3]: focus.rot at the last motion reset
 #define PLAYER_LOOK_FLAGS 0x129BC // u32, PLAYER_LOOK_*
 #define PLAYER_LOOK_GYRO 0x1 // the gyroscope sets focus.rot; stays set after the look ends
