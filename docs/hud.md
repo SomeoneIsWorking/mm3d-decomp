@@ -45,8 +45,24 @@ frames 0 to 4, 6 to 0xA frames 5 to 9, 0xC to 0x10 frames 0xA to 0xE, 0x12 on fr
 0xB and 0x11 have none. The table read live equals the image's (mmre-hud2).
 
 Other HUD art: `layout/Joker.Main.Play.gar/menu_top_parts00.ctxb`, and per language
-`layout/<language>/Joker.Main.Play.gar/hud_patrs00_action_text.ctxb` (the action labels, hearts,
-rupee gems, the touch buttons).
+`layout/<language>/Joker.Main.Play.gar/hud_patrs00_action_text.ctxb` (512x256: the action labels,
+hearts, rupee gems, the touch buttons). `Play.mfpk` in `layout/Joker.Main.Play.gar` names that
+sheet as the bundle's texture, and `TouchPanel.mfl` in it has the panes `icon_rupy`, `icon_key`,
+`num_rupy`, `num_key`, `heart00` to `heart19` and the animation `rupy_color_change_anim`: the
+touch screen's rupee, key and hearts are cells of this sheet, and the gem's colour is an
+animation's frame. Cells in the sheet's pixels, measured on the decoded sheet (the `.mfl`'s own
+cell table was not parsed):
+
+| Art | Cell (x, y, w, h) |
+|---|---|
+| Rupee: red, blue, green | 456, 23 / 41 / 60, 18, 18 |
+| Small key | 456, 96, 22, 22 |
+| Heart, plain: full, three quarters, half, a quarter, empty | 483, 3 + 16n, 10, 10 for n = 0 to 4 |
+| Heart with a white rim, the same five | 499, 3 + 16n, 10, 10 |
+
+The wallet picks the gem: green with `upgrades`' wallet bits 0 and blue with 1, seen (table
+above); red for 2 is the remaining cell and was not run. Henriko's pack replaces the sheet whole
+(4096x2048, found by hash).
 
 ## What draws the game's HUD
 
