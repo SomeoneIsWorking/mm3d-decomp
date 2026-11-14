@@ -496,7 +496,14 @@ extern SceneTableEntry gSceneTable[SCENE_TABLE_COUNT]; // 0x0069B340
 #define UI_WIDGET_ACTIVE_FLAGS_HIDDEN 0x0FFDFF00
 
 typedef struct UiWidget {
-    /* 0x000 */ char unk_000[0x20];
+    /* 0x000 */ void* vtable;
+    /* 0x004 */ struct UiLayout* owner;
+    /* 0x008 */ struct UiWidget** siblings; // the parent's children, NULL for a root
+    /* 0x00C */ int32_t index; // in siblings, -1 for a root
+    /* 0x010 */ const char* name;
+    /* 0x014 */ struct UiWidget** children;
+    /* 0x018 */ uint32_t childCount;
+    /* 0x01C */ char unk_01C[0x4];
     /* 0x020 */ struct UiLayout* layout; // the layout a widget stands for, or NULL
     /* 0x024 */ char unk_024[0x5C];
     /* 0x080 */ float alpha;
@@ -532,7 +539,10 @@ typedef struct PlayHud {
     /* 0x188 */ char unk_188[0x20];
     /* 0x1A8 */ PlayActionIcon* aActionIcon;
     /* 0x1AC */ PlayActionIcon* bActionIcon;
-    /* 0x1B0 */ char unk_1B0[0x80];
+    /* 0x1B0 */ char unk_1B0[0x54];
+    /* 0x204 */ UiWidget* lastTimerGroup; // last_timer_g: the final hours' countdown
+    /* 0x208 */ UiWidget* gameTimerGroup; // game_timer_g: the clock, its day bar and frame
+    /* 0x20C */ char unk_20C[0x24];
     /* 0x230 */ float opacity; // set every frame; PlayHud_Draw draws nothing at 0
 } PlayHud; // size = 0x234 (at least)
 

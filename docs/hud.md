@@ -147,8 +147,15 @@ for this frame.
 |---|---|---|
 | Top screen: clock, A and B buttons, chat alert | `PlayHud_Draw` (0x195478), called from 0x1707CC with `PlayState` + 0xCCC4; queues the layout while `PlayHud.opacity` > 0 | live: the root widget hidden (below) leaves the top screen without clock or A (mmre-hud7, play_hidden). `opacity` is written back every frame |
 | A button alone | the widget `PlayHud.aActionButton` (+0x180) | live: hidden, the clock stays (mmre-hud5, hideA2) |
-| Clock alone | not found: hiding the group at `PlayHud` + 0x208 by flags or alpha changes nothing (mmre-hud5, mmre-hud6) | |
+| Clock alone | `PlayHud.gameTimerGroup` (+0x208, `game_timer_g`) and the final hours' `lastTimerGroup` (+0x204, `last_timer_g`) | live: each of the group's seven children hidden leaves no clock, no day bar and no frame (z3d-mods clk6, all); the group's own flags are written back every frame, so hiding it changes nothing (mmre-hud5, mmre-hud6; clk-083be8c8) |
 | Touch screen's main HUD | `MainScreen_Draw` (0x59B27C, `gUiScreens[1]`'s vtable slot 9) queues the bottom background, `BackGround` and the touch panel | live: the touch panel's root widget hidden leaves the background alone (mmre-hud6, touchRoot; mmre-hud7) |
+
+A widget names itself (`name`, +0x10) and holds its children (`children`, `childCount`); a child
+points back at its parent's array (`siblings`, `index`). `PlayHud`'s tree, read live in South Clock
+Town (z3d-mods clk-tree): `game_timer_g` holds `disp_time_g` (the sun or moon, the hour and
+minutes, the red marker), `game_timer_minutes_g`, `time_sheet_base_pane`, `day1_base_g` to
+`day3_base_g` (the bar) and `timer_decoration_g` (its frame); `last_timer_g` holds the countdown's
+hours to seconds and two moon icons.
 
 Hiding a widget: write `flags` (+0x84) = 0x0FFFFF0E and `activeFlags` (+0x88) = 0x0FFDFF00. For a
 layout's root that is the layout + 0x8C and + 0x90. Clearing bit 0 alone does nothing, and writing
