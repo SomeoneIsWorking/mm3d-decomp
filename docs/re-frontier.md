@@ -71,3 +71,19 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - where: docs/ui.md
 - gap: only those three values seen; the writer is not decompiled
 - notes: 
+
+### items.buttons — item buttons and their inventory slots
+- status: re-partial
+- deps: 
+- evidence: X on an item in the Items screen writes its id to buttonItems[0][2] and its slot to buttonSlots[0][2]; a byte written to row 0 shows on the HUD the next frame, rows 1 to 3 show nothing as human (live reads and frames, South Clock Town)
+- where: docs/items.md, include/z3D.h
+- gap: which row Deku, Goron and Zora read for Y, X, I and II; whether rows 1 to 3 are read at all beyond their B byte
+- notes: z3d-mods' second item page keeps four slots in buttonSlots[1][1..4] on that assumption
+
+### save.write — the routine that writes a file
+- status: hack
+- deps: items.buttons
+- evidence: none live; no save has been made on the harness (the South Clock Town owl statue gives no prompt after warp 0xD890)
+- where: docs/items.md
+- gap: the writer is not found. Leads from the code: 0x60415C is a state handler that calls 0x1AF034, 0x1C48AC, 0x1C92A8 and 0x1C9F20 and then copies SaveData (0x1A88 bytes) to gCommonData + 0x1A90; 0x1AFCC0 copies it back; 0x15E870 fills a new file's player, equipment and inventory from defaults
+- notes: z3d-mods puts the first item page back when a text box opens instead of hooking the writer
