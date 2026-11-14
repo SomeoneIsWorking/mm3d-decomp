@@ -14,11 +14,13 @@
 #define ITEM_OCARINA 0x00
 #define ITEM_BOW 0x01
 #define ITEM_BOMB 0x06
+#define ITEM_BOTTLE 0x12 // empty
 #define ITEM_NONE 0xFF
 #define SLOT_OCARINA 0 // SaveData.items
 #define SLOT_BOW 1
 #define SLOT_BOMB 6
 #define MASK_SLOTS_FIRST 24
+#define BOTTLE_SLOTS_FIRST 48
 #define INVENTORY_SLOTS 55 // items, masks, then seven bottles (docs/items.md)
 // PlayState.buttonsHeld: the HID module's debug bit, which no 3DS button sets.
 #define PAD_DEBUG 0x1000
