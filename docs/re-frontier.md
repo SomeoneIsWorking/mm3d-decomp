@@ -78,7 +78,23 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - evidence: X on an item in the Items screen writes its id to buttonItems[0][2] and its slot to buttonSlots[0][2]; Deku, Goron and Zora draw and assign row 0 too, and the game stores nothing to buttonSlots[1..3] in any form (write watch, z3d-mods run mm-forms2)
 - where: docs/items.md, include/z3D.h
 - gap: 
-- notes: z3d-mods' second item page keeps four slots in buttonSlots[1][1..4]
+- notes: z3d-mods' item slots are kept in buttonSlots[1..3][1..4]
+
+### items.screens — the Items and Masks screens' cursor and grids, the bottles' slots, and an item button pressed for the player
+- status: re-partial
+- deps: items.buttons, ui.screen
+- evidence: live: the Items screen's cursor column and row, the item grid's slots, a bottle in slot 48 drawn in its cell, the bow used from I and a bomb from II through gTouchButtonsHeld and gTouchButtonsPressed written at Play_Update's entry (z3d-mods runs ctl-mm1, ctl-mm6); the rest read from the disassembly (0x5C1328, 0x1DB1C4, 0x2190FC)
+- where: docs/items.md, include/z3D.h
+- gap: the Masks screen and its grid were not opened; Y and X were not pressed this way; ItemScreen is named at four fields; the mask-off and put-away checks of the item button routine are read, not run
+- notes: 
+
+### items.ocarina — the Ocarina screen, the note input and the song table
+- status: re-partial
+- deps: items.screens
+- evidence: live: the screen's page and song cursor, the list's song bytes and the song table dumped, the message object's ocarina mode in free play, the ocarina brought out by TOUCH_BUTTON_OCARINA and the Song of Time recognised from notes written to gPadInjected (z3d-mods runs ctl-mm3, ctl-mm4, ctl-mm7, ctl-mm8, ctl-mm9)
+- where: docs/ocarina.md, include/z3D.h
+- gap: the pad update and the song matcher are read, not decompiled; only the Song of Time was played; its question before the return to the first day was not seen in the file used
+- notes: 
 
 ### save.write — the routine that writes a file
 - status: re-verified

@@ -11,14 +11,28 @@
 #define EQUIP_BUTTON_X 2
 #define EQUIP_BUTTON_I 3
 #define EQUIP_BUTTON_II 4
+#define ITEM_OCARINA 0x00
 #define ITEM_BOW 0x01
 #define ITEM_BOMB 0x06
 #define ITEM_NONE 0xFF
-#define SLOT_BOW 1 // SaveData.items
+#define SLOT_OCARINA 0 // SaveData.items
+#define SLOT_BOW 1
 #define SLOT_BOMB 6
-#define INVENTORY_SLOTS 48 // items, then masks
+#define MASK_SLOTS_FIRST 24
+#define INVENTORY_SLOTS 55 // items, masks, then seven bottles (docs/items.md)
 // PlayState.buttonsHeld: the HID module's debug bit, which no 3DS button sets.
 #define PAD_DEBUG 0x1000
+// The item buttons the pad has, and with them the ocarina's five notes from low to high: L, R, Y,
+// X, A (docs/ocarina.md).
+#define PAD_A 0x1
+#define PAD_R 0x100
+#define PAD_L 0x200
+#define PAD_X 0x400
+#define PAD_Y 0x800
+// gTouchButtonsHeld and gTouchButtonsPressed: the main touch screen's item buttons.
+#define TOUCH_BUTTON_I 0x1
+#define TOUCH_BUTTON_II 0x2
+#define TOUCH_BUTTON_OCARINA 0x8
 #define PLAYER_FORM_HUMAN 4
 
 typedef struct EquipmentData {
@@ -54,11 +68,20 @@ typedef struct SaveData {
     /* 0x01B0 */ uint8_t ammo[11]; // by item id (docs/hud.md)
     /* 0x01BB */ char unk_01BB[0x31];
     /* 0x01EC */ uint32_t upgrades; // UPGRADE_WALLET_*
-    /* 0x01F0 */ uint32_t questItems; // bit 18: the Bombers' Notebook
+    /* 0x01F0 */ uint32_t questItems; // QUEST_*; bit 18: the Bombers' Notebook
     /* 0x01F4 */ char unk_01F4[0x1054];
     /* 0x1248 */ uint8_t weekEventReg[100]; // flag n is byte n / 8, bit n % 8
-    /* 0x12AC */ char unk_12AC[0x7DC];
+    /* 0x12AC */ char unk_12AC[0x77C];
+    /* 0x1A28 */ uint8_t itemGrid[20]; // the Items screen's cells, five to a row: an inventory slot
+    /* 0x1A3C */ uint8_t maskGrid[24]; // the Masks screen's cells, six to a row
+    /* 0x1A54 */ char unk_1A54[0x34];
 } SaveData; // size = 0x1A88
+
+// SaveData.questItems: the songs, in the song table's order from the Sonata of Awakening; the
+// Song of Time is the seventh. The Goron Lullaby's intro has its own bit.
+#define QUEST_SONG_FIRST 6
+#define QUEST_SONG_COUNT 12
+#define QUEST_SONG_LULLABY_INTRO 24
 
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene
@@ -240,6 +263,32 @@ typedef struct UiScreenContext {
     /* 0x0C */ char unk_0C[0x4];
 } UiScreenContext; // size = 0x10 (at least)
 
+// The Items and Masks screens (gUiScreens[UI_SCREEN_ITEMS] and [UI_SCREEN_MASKS], docs/items.md).
+typedef struct ItemScreen {
+    /* 0x00 */ char unk_00[0x18];
+    /* 0x18 */ int8_t cursorColumn; // buttonColumn on the item buttons' column
+    /* 0x19 */ int8_t cursorRow;
+    /* 0x1A */ char unk_1A[0x85];
+    /* 0x9F */ uint8_t state; // 2 while browsing
+    /* 0xA0 */ char unk_A0[0x3];
+    /* 0xA3 */ uint8_t buttonColumn; // 5 on Items, 6 on Masks
+} ItemScreen; // size = 0xA4 (at least)
+
+// The Ocarina screen (gUiScreens[UI_SCREEN_OCARINA], docs/ocarina.md).
+typedef struct OcarinaScreen {
+    /* 0x00 */ char unk_00[0x40];
+    /* 0x40 */ int32_t playPage; // 1 on "Play your instrument", 0 on the song list
+    /* 0x44 */ int32_t songCursor; // the song list's entry, five to a row
+} OcarinaScreen; // size = 0x48 (at least)
+
+// gOcarinaListSongs: an entry's value less this is its row of gOcarinaSongButtons.
+#define OCARINA_LIST_SONG_BASE 0x12
+#define OCARINA_LIST_SONGS 14
+#define OCARINA_SONG_BUTTONS_SIZE 9
+// The message object's ocarina mode word, and its value in free play.
+#define MESSAGE_OCARINA_MODE 0x42C
+#define MESSAGE_OCARINA_MODE_FREE_PLAY 0xD
+
 // BgCheck_Allocate's budget for a scene's static collision (docs/formats/scene_files.md).
 #define BGCHECK_SUBDIV_OVERLAP 50
 #define BGCHECK_SUBDIV_MIN 150
@@ -419,5 +468,13 @@ extern CommonData gCommonData; // 0x007751D8
 extern PlayState* gPlayState; // 0x00667890
 extern UiScreenContext gUiScreenContext; // 0x0072F5BC
 extern void* gUiScreens[UI_SCREEN_COUNT]; // 0x00656B00
+// Pad buttons ORed into the next pad update's held word, then cleared (docs/ocarina.md).
+extern uint32_t gPadInjected; // 0x0072A0DC
+// The touch item buttons as the pad update leaves them: held, and pressed this frame.
+extern uint8_t gTouchButtonsHeld; // 0x0072A0ED
+extern uint8_t gTouchButtonsPressed; // 0x0072A0EE
+extern void* gMessageObject; // 0x006B3724
+extern uint8_t gOcarinaSongButtons[][OCARINA_SONG_BUTTONS_SIZE]; // 0x006A2AF6
+extern uint8_t gOcarinaListSongs[OCARINA_LIST_SONGS]; // 0x00620D64
 
 #endif

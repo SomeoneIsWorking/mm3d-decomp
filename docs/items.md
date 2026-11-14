@@ -32,3 +32,36 @@ pressed this frame. Bit 12, which no 3DS button sets, arrives there unchanged.
 
 `Actor_UpdateAll` (0x174640) walks the twelve actor categories of the actor context
 (`PlayState` + 0x20B0) once a frame, called from the play update at 0x15F644.
+
+## The inventory's slots, the Items and Masks screens
+`SaveData.items` runs past its 24 bytes as one array of slots: items 0 to 23, masks 24 to 47
+(`MASK_SLOTS_FIRST`), then seven bottles from 48 (`INVENTORY_SLOTS` 55). Live (z3d-mods run
+ctl-mm6): item 0x12 written to slot 48 shows as an empty bottle in the Items screen's fourth
+cell of the third row.
+
+`SaveData.itemGrid` (+0x1A28, 20 bytes, five to a row) and `maskGrid` (+0x1A3C, 24 bytes, six to
+a row; read from the disassembly, not seen) hold each cell's slot. A new file's item grid reads
+1 2 3 4 6, 7 8 9 10 12, 14 15 16 48 49, 50 to 54: the ocarina's slot 0 is not in it.
+
+The Items and Masks screens are one class (`ItemScreen`, `gUiScreens[UI_SCREEN_ITEMS]` and
+`[UI_SCREEN_MASKS]`): `cursorColumn` (+0x18) and `cursorRow` (+0x19) are the cell under the
+cursor, `buttonColumn` (+0xA3, 5 on Items) the column of the item buttons, `state` (+0x9F) 2
+while browsing. Live (ctl-mm1): the cursor reads 0,0 when the screen opens, 1,0 after a move
+right and 1,1 after a move down.
+
+## Pressing an item button for the player
+`Play_Update` (0x15F644) runs every frame of a play state, a touch screen up or not;
+`Actor_UpdateAll` does not run while the Items screen is up (a hook there saw no frame, ctl-mm5).
+
+Live (ctl-mm6), written at the start of `Play_Update`:
+- An item and its slot in `buttonItems[0][n]` and `buttonSlots[0][n]` of I or II, with
+  `TOUCH_BUTTON_I` or `TOUCH_BUTTON_II` ORed into `gTouchButtonsHeld` (0x72A0ED) and
+  `gTouchButtonsPressed` (0x72A0EE), which the pad update fills from the touch screen, uses the
+  item: the Hero's Bow on I was drawn and aimed, a bomb on II taken in hand.
+- Y and X read `PAD_Y` and `PAD_X` of `buttonsHeld` and `buttonsPressed` instead (read from the
+  item button loop at 0x1DB748, not run this way).
+- `TOUCH_BUTTON_OCARINA` in both brings the ocarina out (ctl-mm7).
+
+## Bytes the game leaves alone
+z3d-mods keeps its item slots in `buttonSlots[1..3][1..4]`; a save at the owl statue keeps them,
+and the file's first row is the game's own (run ctl-mmsave, save0.bin read back).
