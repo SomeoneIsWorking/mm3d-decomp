@@ -15,12 +15,20 @@ vaddr,name
 0017419c,Cutscene_BeginScript
 00174640,Actor_UpdateAll
 0017ec58,LayoutDrawManager_Draw
+0017ec80,Message_ParseText
 001846b4,Cutscene_ProcessCommands
 0018ad44,SaveFile_UpdateWrite
 0018da50,SaveFile_StartWrite
 00195478,PlayHud_Draw
+001963c8,Message_DispatchControlCode
 001b4ee8,Save_Checksum
+001b8bdc,MessageSet_Parse
 001c5018,Message_GetState
+001c51d0,MessageMgr_Get
+001d1d9c,MessageWindow_StartPrinter
+001d85b8,MessagePrinter_Update
+001d87d0,MessagePrinter_Reset
+001d885c,MessagePrinter_Start
 001ef228,Message_CloseTextbox
 001f59c8,Motion_Get
 0020e894,Inventory_ChangeAmmo
@@ -42,3 +50,6 @@ vaddr,name
 004cf9c4,CutsceneHandler_StartScript
 0059b27c,MainScreen_Draw
 005f9d04,PlayActionIcon_Update
+00607584,MessagePrinter_InstantOff
+00607604,MessagePrinter_InstantOn
+006076dc,MessagePrinter_Delay

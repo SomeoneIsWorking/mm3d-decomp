@@ -56,6 +56,14 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - gap: 
 - notes: MessageContext is unnamed
 
+### message.printer — control codes, the parser's elements and the printer that reveals them
+- status: re-verified
+- deps: 
+- evidence: z3d-mods Quick Text: the printer's instantOn before each printing update shows a box whole in one update and a delay code still pauses (runs mm-qt-on, mm-qt-off, mm-qt-box); the code table decodes all 6152 US messages to their end code
+- where: docs/message.md, include/z3D.h
+- gap: the codes that insert names, numbers and times; the sound and colour arguments; the layout visitor's fields
+- notes: 
+
 ### message.font — the GZFX font file and what draws its glyphs
 - status: re-partial
 - deps: 

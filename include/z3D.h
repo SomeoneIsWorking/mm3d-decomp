@@ -289,6 +289,48 @@ typedef struct OcarinaScreen {
 #define OCARINA_LIST_SONG_BASE 0x12
 #define OCARINA_LIST_SONGS 14
 #define OCARINA_SONG_BUTTONS_SIZE 9
+// A message's text is compiled into elements; the printer shows them over time (docs/message.md).
+// An element calls the method of its control code on the printer.
+typedef struct MessagePrinterVtbl {
+    /* 0x00 */ void* character;
+    /* 0x04 */ char unk_04[0x10];
+    /* 0x14 */ void* instantOn; // code 0x27
+    /* 0x18 */ void* instantOff; // code 0x28
+    /* 0x1C */ void* delay; // code 0x29
+} MessagePrinterVtbl; // size = 0x78
+
+// The message window's printer (MessageWindow + 0x368).
+typedef struct MessagePrinter {
+    /* 0x00 */ MessagePrinterVtbl* vtable;
+    /* 0x04 */ void* input; // asks the pad; null stops the update
+    /* 0x08 */ void* listener;
+    /* 0x0C */ void* elements; // the MessageSet being printed
+    /* 0x10 */ float speed; // by language: 1 Japanese, 3 the others
+    /* 0x14 */ int32_t speedIndex; // code 0x2D; 3 at the start
+    /* 0x18 */ float printed; // characters due, in thirtieths
+    /* 0x1C */ int32_t element; // the next element
+    /* 0x20 */ int32_t character; // the next character in it
+    /* 0x24 */ int32_t shown; // characters printed
+    /* 0x28 */ char unk_28[0x24];
+    /* 0x4C */ float delay; // seconds left of a code 0x29
+    /* 0x50 */ uint8_t state; // MESSAGE_PRINTER_*
+    /* 0x51 */ char unk_51[0x1];
+    /* 0x52 */ uint8_t instant; // the rest of the box prints in this update
+    /* 0x53 */ uint8_t choice; // code 0x2F
+    /* 0x54 */ char unk_54[0x8];
+} MessagePrinter; // size = 0x5C
+
+#define MESSAGE_PRINTER_IDLE 0
+#define MESSAGE_PRINTER_PRINTING 1
+#define MESSAGE_PRINTER_WAIT_KEY 2 // code 0x31: A for the next box
+#define MESSAGE_PRINTER_DELAY 3
+#define MESSAGE_PRINTER_END_WAIT 4 // code 0x2B: the message's last box
+#define MESSAGE_PRINTER_CHOICE 5
+#define MESSAGE_PRINTER_DONE 12
+
+// The message window (gMessageObject): its printer.
+#define MESSAGE_WINDOW_PRINTER 0x368
+
 // The message object's ocarina mode word, and its value in free play.
 #define MESSAGE_OCARINA_MODE 0x42C
 #define MESSAGE_OCARINA_MODE_FREE_PLAY 0xD
