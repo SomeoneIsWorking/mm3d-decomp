@@ -229,6 +229,31 @@ typedef struct ActorContext {
     /* 0x10 */ ActorListEntry actorLists[ACTORCAT_COUNT];
 } ActorContext; // size = 0xA0 (at least)
 
+// A point seen from another (OLib_Vec3fDiffToVecGeo): pitch is the elevation, so positive is above.
+typedef struct VecGeo {
+    /* 0x0 */ float r;
+    /* 0x4 */ int16_t pitch;
+    /* 0x6 */ int16_t yaw;
+} VecGeo; // size = 0x8
+
+struct PlayState;
+
+// A camera (docs/camera.md). Camera_Follow reads the eye back from eyeNext every update, so a turn
+// of eyeNext around at is kept.
+typedef struct Camera {
+    /* 0x000 */ char unk_000[0x14];
+    /* 0x014 */ int16_t yawRate; // Camera_Follow: the C-stick's turn this update, eased
+    /* 0x016 */ int16_t pitchRate;
+    /* 0x018 */ char unk_018[0x38];
+    /* 0x050 */ Vec3f at;
+    /* 0x05C */ Vec3f eye; // after collision
+    /* 0x068 */ char unk_068[0xC];
+    /* 0x074 */ Vec3f eyeNext; // before collision
+    /* 0x080 */ char unk_080[0x20];
+    /* 0x0A0 */ struct PlayState* play;
+    /* 0x0A4 */ char unk_0A4[0xF4];
+} Camera; // size = 0x198
+
 // Writes a built file to save<n>.bin as a job; SaveFile_UpdateWrite frees the job once done.
 typedef struct SaveWriter {
     /* 0x00 */ void* job;
@@ -253,7 +278,9 @@ typedef struct PlayState {
     /* 0x014A */ char unk_014A[0xD6];
     /* 0x0220 */ Vec3f viewEye; // where the frame is drawn from (docs/actors.md)
     /* 0x022C */ Vec3f viewAt; // and the point it looks at
-    /* 0x0238 */ char unk_0238[0x1E78];
+    /* 0x0238 */ char unk_0238[0x1D0];
+    /* 0x0408 */ Camera mainCamera;
+    /* 0x05A0 */ char unk_05A0[0x1B10];
     /* 0x20B0 */ ActorContext actorCtx;
     /* 0x2150 */ char unk_2150[0x2D8];
     /* 0x2428 */ CutsceneContext csCtx;

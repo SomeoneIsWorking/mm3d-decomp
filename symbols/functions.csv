@@ -22,8 +22,10 @@ vaddr,name
 0018da50,SaveFile_StartWrite
 00195478,PlayHud_Draw
 001963c8,Message_DispatchControlCode
+001b049c,OLib_AddVecGeoToVec3f
 001b4ee8,Save_Checksum
 001b8bdc,MessageSet_Parse
+001bf070,OLib_Vec3fDiffToVecGeo
 001c5018,Message_GetState
 001c51d0,MessageMgr_Get
 001d1d9c,MessageWindow_StartPrinter
@@ -34,6 +36,7 @@ vaddr,name
 001f59c8,Motion_Get
 0020e894,Inventory_ChangeAmmo
 002118c8,Player_ResetLook
+002185c8,Input_CStickNeutral
 00219610,Motion_Update
 0021c5ac,Player_UpdateLook
 0021d440,Inventory_SetAmmo
@@ -47,6 +50,7 @@ vaddr,name
 003f1a4c,CutsceneHandler_RunScript
 0043a950,StaticLookup_AddPolyToSSList
 0043e818,SaveFile_StartWriteSlot
+0046fad4,Camera_Follow
 0048abd0,Scene_CommandCollisionHeader
 004cf9c4,CutsceneHandler_StartScript
 0059b27c,MainScreen_Draw

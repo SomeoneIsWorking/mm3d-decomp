@@ -126,7 +126,15 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - deps: none
 - evidence: Actor_UpdateAll (0x174640) walks ctx + 0x14 + category * 0xC and copies +0x24 to +0x10C; live in South Clock Town the first actor of category 2 has id 0, home and world (-281, 0, -700), and a position written to home, world and prevPos moves Link; z3d-mods' walk step steers him by PlayState's view eye and look-at (+0x220, +0x22C)
 - where: docs/actors.md
-- gap: the rest of Actor (bgCheckFlags, floor height, shape) and the Player fields past it; the camera structures behind the view
+- gap: the rest of Actor (bgCheckFlags, floor height, shape) and the Player fields past it
+
+### camera.follow — the player's camera and the C-stick's turn
+- status: re-partial
+- deps: actors.player
+- evidence: Camera_Follow (0x46FAD4), Input_CStickNeutral (0x2185C8) and the two OLib VecGeo functions read in the disassembly; live at South Clock Town's owl statue, a turn of mainCamera.eyeNext around at, made at Camera_Follow's entry while Input_CStickNeutral reads as not neutral, turns the camera's direction by the turn within 2% (z3d-mods runs mm-q-mouse7, mm-q-mouse8)
+- where: docs/camera.md, include/z3D.h, symbols/functions.csv
+- gap: the stick floats at play + 0x80 / + 0x84 and the input block behind play + 0x14 are not checked live; the default follow function (0x447FE8) and the camera's other modes are unread
+- notes: 
 
 ### collision.budget — what BgCheck_Allocate gives a scene
 - status: re-partial
