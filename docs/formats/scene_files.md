@@ -21,7 +21,11 @@ place of a wrapped one (z3d-mods run mm-st2: East Clock Town from an unwrapped `
 The header is OoT3D's (decomp/oot3d `docs/notes/scene_collision.md`) with two more bytes before
 the bounds: the vertex count is at +0x0E and the triangle count at +0x10; the vertex list offset
 stays at +0x18 and the triangle list at +0x1C. Vertices are three s16, triangles 20 bytes (u16
-type, three u16 corners with flags in the top three bits, u16 0, s16 normal x3, f32 distance).
+type, three u16 corners with flags in the top three bits, s16 normal x3, u16 0, f32 distance):
+the normal comes before the zero word, where OoT3D has it after. Every triangle of every scene
+fits `(vB - vA) x (vC - vA)` and `n.p == -distance` read that way, and none read OoT3D's way.
+A triangle written OoT3D's way is not a floor: Link fell through the Astral Observatory's stairs
+(z3d-mods run mm-st5-1) and stands on them written this way (mm-st6-1).
 `z2_kindan2`: 1851 vertices from 0x220 end at 0x2D82, 2671 triangles from 0x2D84 end at 0xFE30,
 where the next list starts.
 
