@@ -12,8 +12,10 @@
 #define EQUIP_BUTTON_I 3
 #define EQUIP_BUTTON_II 4
 #define ITEM_BOW 0x01
+#define ITEM_BOMB 0x06
 #define ITEM_NONE 0xFF
 #define SLOT_BOW 1 // SaveData.items
+#define SLOT_BOMB 6
 #define INVENTORY_SLOTS 48 // items, then masks
 // PlayState.buttonsHeld: the HID module's debug bit, which no 3DS button sets.
 #define PAD_DEBUG 0x1000
