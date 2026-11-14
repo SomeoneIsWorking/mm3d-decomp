@@ -35,18 +35,28 @@ for 0x11, 0x15, 0x1C, 0x22, 0x25, 0x26, 0x29, 0x2A, 0x2B, 0x2D, 0x2F, 0x31 and 0
 plural as strings in the text. With these every US English message but one reads to its end
 and back byte for byte (z3d-mods `tools/z3dmods/gmsg.py`).
 
-0x25 n draws a prompt icon. By the words around them in the English text and, for those
-marked, seen drawn (z3d-mods run `txt-mm-r4`):
+0x25 n draws a prompt icon, a 16 by 16 cell of `layout/<language>/Joker.Main.gar/parts.ctxb`
+(256 by 128). Icons 0 to 0x1D are the cells in rows of ten from (96, 0): icon n at
+x = 96 + 16 (n mod 10), y = 16 (n div 10). By the words around them in the English text and,
+for those marked, seen drawn (z3d-mods runs `txt-mm-r4`, `txt-mm-w1` to `txt-mm-w3`):
 
 | Icon | Is |
 |---|---|
-| 1 to 6 | A, B (seen), X, Y (seen), L (seen), R |
-| 8 | taken to be START ("press ... to return") |
-| 0x11 | Circle Pad |
-| 0x12 to 0x15 | Circle Pad down, left, up and right (the camera options) |
+| 1 to 6 | A (seen), B (seen), X (seen), Y (seen), L (seen), R (seen) |
+| 7 | START (seen; no English message uses it) |
+| 8 | HOME ("press ... to return to the HOME Menu", seen) |
+| 9 | POWER (no message uses it; seen drawn) |
+| 0x0A to 0x10 | the +Control Pad, each direction and both axes |
+| 0x11 | Circle Pad (seen) |
+| 0x12 to 0x15 | Circle Pad up, right, down and left (the cells' arrows; the camera options' inverted texts agree) |
+| 0x16, 0x17 | Circle Pad up and down, left and right |
 | 0x18, 0x1B | the I and II item buttons (seen) |
-| 0x1C, 0x1E, 0x20, 0x2D, 0x2E | touch-screen icons ("Tap ... on the lower screen") |
+| 0x1C, 0x1E, 0x20, 0x2D, 0x2E | touch-screen icons ("Tap ... on the lower screen"); 0x1F is the ocarina's ("Take it out with ...") and 0x20 the Pictograph Box's. Past 0x1D the cells do not follow the rows of ten |
 | 0x2F | a place's marker before its name (the map's list) |
+
+A message can be shown on demand through South Clock Town's owl statue (entrance 0xD890):
+its `Actor.textId` (+0x11A) is written back every frame, so the number has to be written
+again in the frames A is held (`txt-mm-p7`).
 
 ## Parsing
 - `MessageMgr_Get` (0x1C51D0) returns the manager at 0x6B36F8; `gMessageObject` (+0x2C) is its
