@@ -14,8 +14,11 @@ Live (USA 1.0 layout under Project Restoration, South Clock Town, human Link):
   while Link is human.
 - The item stays in the Items screen's grid when it is assigned.
 
-Not checked: which row the other forms read for Y, X, I and II. The N64 game keeps one item page
-for every form and a B item per form.
+Every form uses row 0 for Y, X, I and II (poked `SaveData.playerForm`, then a scene load, South
+Clock Town): as Deku, Goron and Zora the HUD and the Items screen draw row 0's items, X in the Items
+screen assigns into row 0, and a write watch on `buttonSlots[1..3]` sees no store from the game
+through a scene load, item presses and the Items screen in each form. A slot left in
+`buttonSlots[1][1]` stays there and shows nowhere. Rows 1 to 3 hold only a B item per form.
 
 `SaveData.items` (+0x174) and `SaveData.masks` (+0x18C) are 24 bytes each, by slot.
 

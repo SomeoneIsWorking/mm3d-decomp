@@ -73,24 +73,17 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - notes: 
 
 ### items.buttons — item buttons and their inventory slots
-- status: re-partial
+- status: re-verified
 - deps: 
-- evidence: X on an item in the Items screen writes its id to buttonItems[0][2] and its slot to buttonSlots[0][2]; a byte written to row 0 shows on the HUD the next frame, rows 1 to 3 show nothing as human (live reads and frames, South Clock Town)
+- evidence: X on an item in the Items screen writes its id to buttonItems[0][2] and its slot to buttonSlots[0][2]; Deku, Goron and Zora draw and assign row 0 too, and the game stores nothing to buttonSlots[1..3] in any form (write watch, z3d-mods run mm-forms2)
 - where: docs/items.md, include/z3D.h
-- gap: which row Deku, Goron and Zora read for Y, X, I and II; whether rows 1 to 3 are read at all beyond their B byte
-- notes: z3d-mods' second item page keeps four slots in buttonSlots[1][1..4] on that assumption
+- gap: 
+- notes: z3d-mods' second item page keeps four slots in buttonSlots[1][1..4]
 
 ### save.write — the routine that writes a file
-- status: hack
-- deps: items.buttons
-- evidence: none live; no save has been made on the harness (the South Clock Town owl statue gives no prompt after warp 0xD890)
-- where: docs/items.md
-- gap: the writer is not found. Leads from the code: 0x60415C is a state handler that calls 0x1AF034, 0x1C48AC, 0x1C92A8 and 0x1C9F20 and then copies SaveData (0x1A88 bytes) to gCommonData + 0x1A90; 0x1AFCC0 copies it back; 0x15E870 fills a new file's player, equipment and inventory from defaults
-- notes: z3d-mods puts the first item page back when a text box opens instead of hooking the writer
-
-### actors.player — the actor lists and the player's position
 - status: re-verified
-- deps: none
-- evidence: Actor_UpdateAll (0x174640) walks ctx + 0x14 + category * 0xC and copies +0x24 to +0x10C; live in South Clock Town the first actor of category 2 has id 0, home and world (-281, 0, -700), and a position written to home, world and prevPos moves Link
-- where: docs/actors.md
-- gap: the rest of Actor (bgCheckFlags, floor height, shape) and the Player fields past it
+- deps: items.buttons
+- evidence: Play_SaveAtStatue hooked at its entry; a save at South Clock Town's owl statue writes save0.bin with the equipment as RAM held it, and the file loads in the game without the hook (z3d-mods runs mm-sv-held, mm-sv-rel, mm-ld-plain)
+- where: docs/save.md, symbols/functions.csv
+- gap: 
+- notes: the writer object at PlayState + 0x3BEC and the job it queues are unnamed
