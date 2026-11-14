@@ -22,6 +22,11 @@ through a scene load, item presses and the Items screen in each form. A slot lef
 
 `SaveData.items` (+0x174) and `SaveData.masks` (+0x18C) are 24 bytes each, by slot.
 
+The Hero's Bow is item 1 (`ITEM_BOW`) in slot 1 (`SLOT_BOW`), its arrows `SaveData.ammo[ITEM_BOW]`.
+Written there with the slot in `buttonSlots[1][EQUIP_BUTTON_Y]`, the chord page of z3d-mods'
+patch, Y draws and aims it in South Clock Town (z3d-mods run `mm-ch20`), and a save at the owl
+statue keeps all three.
+
 `PlayState.buttonsHeld` (+0x30) is the pad's held buttons and `buttonsPressed` (+0x34) the ones
 pressed this frame. Bit 12, which no 3DS button sets, arrives there unchanged.
 
