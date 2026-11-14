@@ -32,7 +32,7 @@ write and the next frame. A fresh file reads `healthCapacity` 0x30, `health` 0x3
 
 Not found: the magic capacity (the word at `gCommonData` + 0x368A reads 0x30 and is written back by
 the game; the fill of a double meter was not measured), `SaveData` + 0x136 (no effect seen), the
-powder keg's count (not in `ammo`), what decides the minimap.
+powder keg's count (not in `ammo`).
 
 ## Writing a button's item by hand
 `equipment.buttonItems[0]` is what the HUD and a button's use read, and `buttonSlots[0]` the
@@ -116,6 +116,22 @@ cell table was not parsed):
 The wallet picks the gem: green with `upgrades`' wallet bits 0 and blue with 1, seen (table
 above); red for 2 is the remaining cell and was not run. Henriko's pack replaces the sheet whole
 (4096x2048, found by hash).
+
+## Minimap
+
+`MainScreen_Draw` calls `MainScreen_DrawMinimap` (0x2A326C, from 0x59B348) while the play
+state's +0x13D is 4, and it calls `Minimap_Draw` (0x36DEBC). That fills the quad batches
+`gMinimapQuads[0]`, `[1]` (the room's layers) and `gMinimapMarkerQuads` (the player's arrow and
+the markers) with screen-space quads and queues them on `gLayoutDrawManager`'s
+`LAYOUT_DRAW_QUEUE_TOUCH`; the frame draws each queue in ascending priority. A batch moved to
+`LAYOUT_DRAW_QUEUE_TOP` after the call, its positions and sizes rescaled, draws on the top screen
+(z3d-mods `patch/mm3d/minimap.cpp`; live: South Clock Town, Termina Field and Woodfall Temple, mmmap3, mmmap7).
+
+The map data loads in every scene that has one (the header at `*0x6890F4`, written by 0x4BD4C8 and
+0x4BD504 on a scene change, mmmap5); the room index is the state's +0x54. The rooms are drawn only
+while `Inventory_IsMapVisible(sceneNum)` (0x5475A8: `SaveData.scenesVisible`, Tingle's maps) or
+0x1CF20C (a dungeon) holds: a new file shows nothing in Termina Field until the scene's bit is set
+(mmmap4, mmmap7). `WEEK_EVENT_REGION_MAPS` is the Map screen's loupe and does not show it (mmmap3).
 
 ## What draws the game's HUD
 

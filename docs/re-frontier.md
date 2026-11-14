@@ -149,12 +149,12 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - deps: items.buttons
 - evidence: health, heart containers, magic, rupees, the wallet bits, ammo by item id, small keys by dungeon, time and day written live and read off the game's HUD; sItemIconFrames read live and matched against icon_item_menu00's sheet through item ids on the I and II buttons (z3d-mods runs mmre-save1, mmre-hud2 to mmre-hud4, mmkeys2, mmkeys5)
 - where: docs/hud.md, include/z3D.h
-- gap: magic capacity and the fill of a double meter; buttonStatus seen once, never written; the A label's text number to label; the minimap; the powder keg's count
+- gap: magic capacity and the fill of a double meter; buttonStatus seen once, never written; the A label's text number to label; the powder keg's count
 
 ### hud.draw — what draws the game's HUD
 - status: re-partial
 - deps: ui.screens
-- evidence: PlayHud_Draw (0x195478) and MainScreen_Draw (0x59B27C) decompiled; PlayHud's root widget, its A button widget and the touch panel's root widget hidden live by their flags (mmre-hud5 to mmre-hud7)
+- evidence: PlayHud_Draw (0x195478) and MainScreen_Draw (0x59B27C) decompiled; PlayHud's root widget, its A button widget and the touch panel's root widget hidden live by their flags (mmre-hud5 to mmre-hud7); the minimap's quad batches moved from the touch queue to the top one, and the scene's map shown by SaveData.scenesVisible (mmmap3 to mmmap7)
 - where: docs/hud.md, include/z3D.h, symbols/functions.csv
 - gap: the clock's own widget; a code patch seen working; dialog boxes with the HUD hidden
 

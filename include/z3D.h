@@ -39,6 +39,7 @@
 #define TOUCH_BUTTON_II 0x2
 #define TOUCH_BUTTON_OCARINA 0x8
 #define PLAYER_FORM_HUMAN 4
+#define SCENES_VISIBLE_WORDS 7
 
 typedef struct EquipmentData {
     /* 0x00 */ uint8_t buttonItems[4][5]; // item on each button; row 0 is Link's in human form
@@ -76,7 +77,9 @@ typedef struct SaveData {
     /* 0x01F0 */ uint32_t questItems; // QUEST_*; bit 18: the Bombers' Notebook
     /* 0x01F4 */ uint8_t dungeonItems[10];
     /* 0x01FE */ int8_t dungeonKeys[9]; // by DUNGEON_INDEX_*; -1 none yet
-    /* 0x0207 */ char unk_0207[0x1041];
+    /* 0x0207 */ char unk_0207[0xFE1];
+    /* 0x11E8 */ uint32_t scenesVisible[SCENES_VISIBLE_WORDS]; // a scene's map in play and on the Map screen: bit sceneNum % 32 of word sceneNum / 32 (Tingle's maps)
+    /* 0x1204 */ char unk_1204[0x44];
     /* 0x1248 */ uint8_t weekEventReg[100]; // flag n is byte n / 8, bit n % 8
     /* 0x12AC */ char unk_12AC[0x77C];
     /* 0x1A28 */ uint8_t itemGrid[20]; // the Items screen's cells, five to a row: an inventory slot
@@ -531,6 +534,35 @@ typedef struct PlayHud {
 #define UI_LAYOUT_HUD 2 // PlayHud
 #define UI_LAYOUT_COUNT 49
 
+// The frame's 2D draw queues (docs/hud.md "Minimap"): a drawable and its priority per entry, the
+// queue drawn in ascending priority.
+#define LAYOUT_DRAW_QUEUE_COUNT 8
+#define LAYOUT_DRAW_QUEUE_CAPACITY 0x180
+#define LAYOUT_DRAW_QUEUE_TOP 4 // the top screen's 2D, over the 3D
+#define LAYOUT_DRAW_QUEUE_TOUCH 6 // the touch screen's map
+
+typedef struct LayoutDrawManager {
+    /* 0x0000 */ char unk_0000[0x14];
+    /* 0x0014 */ uint32_t queueCounts[LAYOUT_DRAW_QUEUE_COUNT];
+    /* 0x0034 */ char unk_0034[0x544];
+    /* 0x0578 */ void* queues[LAYOUT_DRAW_QUEUE_COUNT][LAYOUT_DRAW_QUEUE_CAPACITY];
+    /* 0x3578 */ uint32_t priorities[LAYOUT_DRAW_QUEUE_COUNT][LAYOUT_DRAW_QUEUE_CAPACITY];
+} LayoutDrawManager; // size = 0x6578 (at least)
+
+// Screen-space quads made each frame: quad i is the corners scaled by sizes[i], turned by
+// rotations[i] and moved to positions[i], in its screen's pixels from the top left.
+typedef struct QuadBatch {
+    /* 0x000 */ char unk_000[0x2B8];
+    /* 0x2B8 */ Vec3f* positions;
+    /* 0x2BC */ float (*rotations)[12];
+    /* 0x2C0 */ Vec3f* sizes;
+    /* 0x2C4 */ uint32_t capacity;
+    /* 0x2C8 */ uint32_t count;
+    /* 0x2CC */ Vec3f corners[4];
+    /* 0x2FC */ char unk_2FC[0x9C];
+    /* 0x398 */ float (*colors)[16]; // four RGBA corners a quad, or none
+} QuadBatch; // size = 0x39C (at least)
+
 // sItemIconFrames: no icon.
 #define ITEM_ICON_NONE 0xFF
 #define ITEM_ICON_COUNT 0xA0
@@ -576,6 +608,10 @@ typedef struct MotionState {
 
 extern MotionState gMotionState; // 0x006B1DF4
 extern UiLayout* gUiCommonLayouts[UI_LAYOUT_COUNT]; // 0x006B7B8C
+extern LayoutDrawManager gLayoutDrawManager; // 0x0071B000
+// The touch screen's map in play: the room's two layers, and its markers (the player's arrow).
+extern QuadBatch* gMinimapQuads[2]; // 0x006890EC
+extern QuadBatch* gMinimapMarkerQuads; // 0x00728198
 extern uint8_t sItemIconFrames[ITEM_ICON_COUNT]; // 0x006562F0
 extern uint8_t gUpgradeShifts[UPGRADE_COUNT]; // 0x00626C34
 extern uint8_t gItemSlots[]; // 0x00626CDC
