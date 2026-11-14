@@ -29,6 +29,18 @@ A triangle written OoT3D's way is not a floor: Link fell through the Astral Obse
 `z2_kindan2`: 1851 vertices from 0x220 end at 0x2D82, 2671 triangles from 0x2D84 end at 0xFE30,
 where the next list starts.
 
+The static collision context is at `PlayState +0xAB0`, laid out as OoT3D's (decomp/oot3d
+`docs/notes/scene_collision.md`): the node list's length is the u16 at +0x44 (57319 in South
+Clock Town), the nodes used the u16 at +0x46.
+
+Corner flags: bit 0x4000 of the first corner (the value 2 in its top three bits) lets actors
+through the triangle, as the N64 games' `COLPOLY_IGNORE_ENTITY`. Shown in game: 12 upright
+triangles 10 units high across the Milk Bar's stairs stop Link into a hop three steps at a time
+without it; with it he runs up them and still lands on the treads between (z3d-mods run
+mm-st11-mb0). The ROM sets that value alone on 119 triangles (65 walls, 29 floors, 25
+ceilings). The first corner's other values are 1 (14066 triangles, mostly walls), 4, 5, 6, 7 and
+3, and the second corner's 4, 1, 2 and 3; none of those is tested.
+
 ## Stairs
 Ramps drawn with a stair texture, all sloped quads (15 to 45 degrees), none modelled as steps:
 `clsouth_step_01` (z2_clocktower 0), `cleast_step_01` (z2_town 0), `clwest_step_01` (z2_ichiba 0),
