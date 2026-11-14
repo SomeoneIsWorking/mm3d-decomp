@@ -33,6 +33,14 @@ Not found: the magic capacity (the word at `gCommonData` + 0x368A reads 0x30 and
 the game; the fill of a double meter was not measured), `SaveData` + 0x136 (no effect seen), the
 powder keg's count (not in `ammo`), what decides the minimap.
 
+## Writing a button's item by hand
+`equipment.buttonItems[0]` is what the HUD and a button's use read, and `buttonSlots[0]` the
+inventory slot behind each. A byte written to `buttonItems` alone draws at once, but nothing knows
+its slot: z3d-mods' chord trade moves slots, so after one press and release of the chord the
+button is empty (hud-mmlook3: X and Y empty after the release). Write both. A bomb count
+written as 10 on a file without a bomb bag read 0 after one bomb: OoT3D clamps a count to the
+bag's capacity on use (its `docs/item_buttons.md`); the same clamp here is likely and not traced.
+
 ## Item icons
 
 `layout/Joker.Main.gar/icon_item_menu00.ctxb` is one 512x512 sheet. Frames 0 to 107 are the item
