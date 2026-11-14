@@ -19,6 +19,12 @@ On the title screen `activeScreen` is 0x6F7FB4, which is not in the table. Proje
 evidence only) names the table's order Black, Main, Schedule, Gear, Items, Map, Masks, Ocarina, and
 the word after `activeScreen` the screen being changed to.
 
+`gUiScreenContext.nextScreen` (+0xC) is the screen to change to, null once the change is made.
+Leaving the Map screen writes Main there (0x5932BC); Start in play writes the notebook's
+(under Project Restoration, from its own code). The same write while the Map screen is up opens
+the notebook from it, and B on the notebook then goes back to play (z3d-mods runs `gap-nb3`,
+`gap-nb4`, a watch on the word). The Map screen itself does nothing with Start or Select (`gap-nb1`).
+
 The notebook is owned when bit 18 of the quest word at `SaveData` + 0x1F0 is set (the N64 game's
 `QUEST_BOMBERS_NOTEBOOK`): set by hand in a fresh file, Start opens the screen.
 

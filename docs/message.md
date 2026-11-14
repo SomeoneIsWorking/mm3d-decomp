@@ -53,6 +53,11 @@ for those marked, seen drawn (z3d-mods runs `txt-mm-r4`, `txt-mm-w1` to `txt-mm-
 | 0x18, 0x1B | the I and II item buttons (seen) |
 | 0x1C, 0x1E, 0x20, 0x2D, 0x2E | touch-screen icons ("Tap ... on the lower screen"); 0x1F is the ocarina's ("Take it out with ...") and 0x20 the Pictograph Box's. Past 0x1D the cells do not follow the rows of ten |
 | 0x2F | a place's marker before its name (the map's list) |
+| 0x33 to 0x35 | View's eye, then ZL and ZR (cells 176 and 192, 80); 0x35 is the Circle Pad Pro's ZR prompt (0x5741) and no message uses 0x34 |
+
+Seen drawn by putting codes into a message (z3d-mods run `gap-ic3`): 0x1D and 0x22 to 0x27
+draw nothing; 0x28 to 0x32 are small pictures (a sun, a moon, three numbered boxes, two touch
+buttons, a clock face, a wave, a card); 0x36 is a white emblem (the credits use it).
 
 A message can be shown on demand through South Clock Town's owl statue (entrance 0xD890):
 its `Actor.textId` (+0x11A) is written back every frame, so the number has to be written

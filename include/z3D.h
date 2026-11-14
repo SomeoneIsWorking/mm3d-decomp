@@ -29,6 +29,7 @@
 // The item buttons the pad has, and with them the ocarina's five notes from low to high: L, R, Y,
 // X, A (docs/ocarina.md).
 #define PAD_A 0x1
+#define PAD_SELECT 0x4
 #define PAD_R 0x100
 #define PAD_L 0x200
 #define PAD_X 0x400
@@ -90,6 +91,7 @@ typedef struct SaveData {
 #define QUEST_SONG_FIRST 6
 #define QUEST_SONG_COUNT 12
 #define QUEST_SONG_LULLABY_INTRO 24
+#define QUEST_BOMBERS_NOTEBOOK 18
 
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene
@@ -305,6 +307,7 @@ typedef struct PlayState {
 // The touch screen's screens (docs/ui.md); the values index gUiScreens.
 #define UI_SCREEN_BLACK 0
 #define UI_SCREEN_MAIN 1
+#define UI_SCREEN_SCHEDULE 2 // the Bombers' Notebook
 #define UI_SCREEN_GEAR 3
 #define UI_SCREEN_ITEMS 4
 #define UI_SCREEN_MAP 5
@@ -316,7 +319,7 @@ typedef struct UiScreenContext {
     /* 0x00 */ void* vtable;
     /* 0x04 */ char unk_04[0x4];
     /* 0x08 */ void* activeScreen; // the gUiScreens entry that is up
-    /* 0x0C */ char unk_0C[0x4];
+    /* 0x0C */ void* nextScreen; // the gUiScreens entry to change to, null once changed
 } UiScreenContext; // size = 0x10 (at least)
 
 // The Items and Masks screens (gUiScreens[UI_SCREEN_ITEMS] and [UI_SCREEN_MASKS], docs/items.md).
