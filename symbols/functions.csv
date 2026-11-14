@@ -22,10 +22,13 @@ vaddr,name
 001c5018,Message_GetState
 001ef228,Message_CloseTextbox
 001f59c8,Motion_Get
+0020e894,Inventory_ChangeAmmo
 002118c8,Player_ResetLook
 00219610,Motion_Update
 0021c5ac,Player_UpdateLook
+0021d440,Inventory_SetAmmo
 002232f8,Motion_GetLook
+00224ef8,Inventory_GetAmmo
 00228e5c,Motion_Reset
 0029b738,BgCheck_Allocate
 002b8c64,BgCheck_InitializeStaticLookup
@@ -37,3 +40,4 @@ vaddr,name
 0048abd0,Scene_CommandCollisionHeader
 004cf9c4,CutsceneHandler_StartScript
 0059b27c,MainScreen_Draw
+005f9d04,PlayActionIcon_Update

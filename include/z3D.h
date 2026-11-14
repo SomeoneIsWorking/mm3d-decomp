@@ -208,7 +208,11 @@ typedef struct PlayState {
     /* 0x2150 */ char unk_2150[0x2D8];
     /* 0x2428 */ CutsceneContext csCtx;
     /* 0x2690 */ char unk_2690[0x5990];
-    /* 0x8020 */ char msgCtx[0x4509];
+    /* 0x8020 */ char msgCtx[0x62A];
+    /* 0x864A */ uint16_t aButtonDoAction; // DO_ACTION_*: the A button's word (docs/hud.md)
+    /* 0x864C */ char unk_864C[0x26];
+    /* 0x8672 */ int16_t aButtonAlpha; // PlayActionIcon_Update fades the A button toward it; not run
+    /* 0x8674 */ char unk_8674[0x3EB5];
     /* 0xC529 */ int8_t transitionTrigger; // 20 requests a scene transition
     /* 0xC52A */ char unk_C52A[0x4];
     /* 0xC52E */ int16_t nextEntrance;
@@ -295,6 +299,17 @@ extern SceneTableEntry gSceneTable[SCENE_TABLE_COUNT]; // 0x0069B340
 // SaveData.upgrades: the wallet, 0 holds 99 rupees and 1 holds 200.
 #define UPGRADE_WALLET_SHIFT 12
 #define UPGRADE_WALLET_MASK 0x3000
+// SaveData.upgrades' fields, the index into gUpgradeMasks, gUpgradeShifts and gUpgradeCapacities.
+#define UPGRADE_QUIVER 0
+#define UPGRADE_BOMB_BAG 1
+#define UPGRADE_WALLET 4
+#define UPGRADE_STICKS 6
+#define UPGRADE_NUTS 7
+#define UPGRADE_COUNT 8
+#define UPGRADE_LEVELS 4
+// PlayState.aButtonDoAction: a word cell of the action sheet, or none (docs/hud.md).
+#define DO_ACTION_NONE 10
+#define DO_ACTION_WORDS 38
 #define BUTTON_ENABLED 0
 #define BUTTON_DISABLED 0xFF
 
@@ -325,7 +340,8 @@ typedef struct UiLayout {
 typedef struct PlayActionIcon {
     /* 0x000 */ UiLayout layout;
     /* 0x170 */ char unk_170[0x20];
-    /* 0x190 */ uint16_t textNum; // the label shown
+    /* 0x190 */ uint16_t textNum; // the label shown: PlayState.aButtonDoAction once the change has played
+    /* 0x192 */ uint8_t changeState; // 0 settled, 1 the old word leaving, 2 the new one arriving
 } PlayActionIcon; // size = 0x194 (at least)
 
 // Joker.Main.Play.Hud: the top screen's clock and action buttons.
@@ -395,6 +411,10 @@ typedef struct MotionState {
 extern MotionState gMotionState; // 0x006B1DF4
 extern UiLayout* gUiCommonLayouts[UI_LAYOUT_COUNT]; // 0x006B7B8C
 extern uint8_t sItemIconFrames[ITEM_ICON_COUNT]; // 0x006562F0
+extern uint8_t gUpgradeShifts[UPGRADE_COUNT]; // 0x00626C34
+extern uint8_t gItemSlots[]; // 0x00626CDC
+extern uint32_t gUpgradeMasks[UPGRADE_COUNT]; // 0x00626D3C
+extern uint16_t gUpgradeCapacities[UPGRADE_COUNT][UPGRADE_LEVELS]; // 0x00626D60
 extern CommonData gCommonData; // 0x007751D8
 extern PlayState* gPlayState; // 0x00667890
 extern UiScreenContext gUiScreenContext; // 0x0072F5BC

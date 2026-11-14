@@ -23,7 +23,7 @@ the frame.
 | Button dimmed | `gCommonData.buttonStatus[button]` (+0x13740), 0 enabled, 0xFF disabled | seen once: the powder keg on I indoors is drawn grey and `buttonStatus[3]` reads 0xFF, the bomb on II is not and reads 0 (mmre-hud4, talk). The game writes entries 0 to 4, 6 and 7 every frame, so a write does not hold |
 | Clock digits, marker | `SaveData.time` (+0x18) | live: 0x8000 reads 12:02 with the marker mid-day (mmre-hud2, noon) |
 | Clock's day | `SaveData.day` (+0xC) | live: 2 moves the marker to the second third of the bar (mmre-hud2, day2) |
-| A button label | `PlayActionIcon.textNum` (+0x190) of `PlayHud.aActionIcon` | read only: 0x0A standing, 0x13 after an A press. The mapping to a label is not done |
+| A button label | `PlayState.aButtonDoAction` (+0x864A, u16), below | live: `PlayActionIcon.textNum`, its copy, against the game's own word in the frame (hud-mm-words) |
 
 The HUD reads health, rupees and the button items as it draws: no counter animates between the
 write and the next frame. A fresh file reads `healthCapacity` 0x30, `health` 0x30, `magic` 0x30,
@@ -37,9 +37,53 @@ powder keg's count (not in `ammo`), what decides the minimap.
 `equipment.buttonItems[0]` is what the HUD and a button's use read, and `buttonSlots[0]` the
 inventory slot behind each. A byte written to `buttonItems` alone draws at once, but nothing knows
 its slot: z3d-mods' chord trade moves slots, so after one press and release of the chord the
-button is empty (hud-mmlook3: X and Y empty after the release). Write both. A bomb count
-written as 10 on a file without a bomb bag read 0 after one bomb: OoT3D clamps a count to the
-bag's capacity on use (its `docs/item_buttons.md`); the same clamp here is likely and not traced.
+button is empty (hud-mmlook3: X and Y empty after the release). Write both, or assign in the
+Items screen: Select opens it with the cursor on the first item, and Y or X puts the item under
+the cursor on that button (hud-mmlive3).
+
+## Ammo and its capacity
+`Inventory_ChangeAmmo(item, change)` (0x20E894) adds to an item's count
+(`Inventory_GetAmmo` 0x224EF8, `Inventory_SetAmmo` 0x21D440: `SaveData.ammo[gItemSlots[item]]`,
+`gItemSlots` 0x626CDC, where items 0 to 15 are their own slot) and then clamps it to 0 and to the
+capacity of the item's upgrade: the bow's is the quiver (`UPGRADE_QUIVER` 0), bombs' and
+bombchus' the bomb bag (1), sticks' 6 and nuts' 7. The capacity is
+`gUpgradeCapacities[upgrade][(SaveData.upgrades & gUpgradeMasks[upgrade]) >> gUpgradeShifts[upgrade]]`.
+Beans (item 0xA) are not clamped and the powder keg (0xC) is kept at 0 or 1.
+
+| Upgrade | Mask | Shift | Capacities (u16, levels 0 to 3) |
+|---|---|---|---|
+| 0 quiver | 0x7 | 0 | 0, 30, 40, 50 |
+| 1 bomb bag | 0x38 | 3 | 0, 20, 30, 40 |
+| 2 | 0x1C0 | 6 | 0, 0, 0, 0 |
+| 3 | 0xE00 | 9 | 0, 0, 0, 0 |
+| 4 wallet | 0x3000 | 12 | 99, 200, 500, 500 |
+| 5 | 0x1C000 | 14 | 0, 30, 40, 50 |
+| 6 sticks | 0xE0000 | 17 | 0, 10, 20, 30 |
+| 7 nuts | 0x700000 | 20 | 0, 20, 30, 40 |
+
+`gUpgradeMasks` 0x626D3C, `gUpgradeShifts` 0x626C34, `gUpgradeCapacities` 0x626D60; read live.
+A count written into a file without the item's bag is therefore 0 after one use. Live (hud-mm-bomb):
+bombs written as 10 with no bomb bag, one bomb pulled: a write watch on the count sees 9 from
+0x21D440, then 0 from 0x20E9D8. With the bag's field at 1 the same bomb leaves 19 of 20, and an
+arrow 29 of 30 with the quiver's at 1 (hud-mmlive3).
+
+## The A button's word
+`PlayActionIcon_Update(icon, play)` (0x5F9D04) runs the A button: it copies
+`PlayState.aButtonDoAction` into `textNum` when the change's animation has played
+(`changeState`), fades the icon toward `PlayState.aButtonAlpha` and shows the word's pane. No word
+is shown for `DO_ACTION_NONE` (10) or a number above 0x29 other than 0x30 to 0x33. With the A
+button's widget hidden (below) the copy stops: `textNum` stays at its last value, so read
+`aButtonDoAction` (hud-mm-hide: 10 in every state).
+
+The number is the word's cell in `hud_patrs00_action_text.ctxb`: cells of 64x18 pixels from
+(0, 93), nine to a column, counted down each column. Seen against the game's own word
+(hud-mm-words): 3 Return (the bow aimed), 12 Drop (a bomb held), 15 Speak (the shop's counter),
+17 Grab (beside a thrown bomb), 19 Put Away (after aiming), 10 nothing. The sheet's cells: 0
+Attack, Check, Barrier, Return, Open, Jump, Select, Dive, Faster; 9 Throw, Roll, Climb, Drop,
+Down, Save, Speak, Next, Grab; 18 Cancel, Put Away, Reel, Info, Soar, Snap, Explode, Dance,
+March; 27 Curl, Surface, Swim, Punch, Pound, Hook, Shoot, Snap, Proceed; 36 Dive, Stop
+(`DO_ACTION_WORDS` 38). Numbers 27 to 34 go through a second pane of the icon; what 0x30 to
+0x33 draw was not seen.
 
 ## Item icons
 
