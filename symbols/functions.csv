@@ -32,8 +32,10 @@ vaddr,name
 001d85b8,MessagePrinter_Update
 001d87d0,MessagePrinter_Reset
 001d885c,MessagePrinter_Start
+001e13bc,UiWidget_SetVisible
 001ef228,Message_CloseTextbox
 001f59c8,Motion_Get
+00201060,Inventory_GetSlotItem
 0020e894,Inventory_ChangeAmmo
 002118c8,Player_ResetLook
 002185c8,Input_CStickNeutral
@@ -54,8 +56,10 @@ vaddr,name
 0043e818,SaveFile_StartWriteSlot
 0046fad4,Camera_Follow
 0048abd0,Scene_CommandCollisionHeader
+004affe0,Pictograph_IsOn
 004cf9c4,CutsceneHandler_StartScript
 005475a8,Inventory_IsMapVisible
+0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
 005f9d04,PlayActionIcon_Update
 00607584,MessagePrinter_InstantOff

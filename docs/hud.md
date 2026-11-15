@@ -135,6 +135,20 @@ while `Inventory_IsMapVisible(sceneNum)` (0x5475A8: `SaveData.scenesVisible`, Ti
 0x1CF20C (a dungeon) holds: a new file shows nothing in Termina Field until the scene's bit is set
 (mmmap4, mmmap7). `WEEK_EVENT_REGION_MAPS` is the Map screen's loupe and does not show it (mmmap3).
 
+## The view icon
+
+The main touch screen's corner (`MainScreen`, `gUiScreens[UI_SCREEN_MAIN]`) holds three widgets
+and `MainScreen_UpdateButtons` (0x59A874) shows one each frame, by `UiWidget_SetVisible`:
+- `camReturn` (+0x28, the camera, "Return") while `Pictograph_IsOn` (0x4AFFE0, `gPictographOn`)
+  or the player's `PLAYER_VIEW_MODE` (+0x11DF1) is not 0;
+- else `camPicture` (+0x24) when `Inventory_GetSlotItem(SLOT_PICTOGRAPH_BOX)` holds an item;
+- else `camChange` (+0x20, the eye, "View").
+
+Their art is the eye and the camera of `Joker.Main.Play.gar/hud_patrs00_action_text.ctxb`
+(language folders), the words under them. Live: the view mode reads 0 in South Clock Town's owl
+room and 1 after ZL (Project Restoration's View), and z3d's HUD draws the eye, then the camera
+(mmview, mmview2). `gPictographOn` read 0 there; the pictograph view was not entered.
+
 ## What draws the game's HUD
 
 Layouts are trees of widgets (`UiLayout`, `UiWidget`; the layout matches Project Restoration's

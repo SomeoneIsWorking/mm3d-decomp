@@ -22,12 +22,14 @@
 #define ITEM_DEKU_NUT 0x09
 #define ITEM_MAGIC_BEANS 0x0A
 #define ITEM_POWDER_KEG 0x0C
+#define ITEM_PICTOGRAPH_BOX 0x0D
 #define ITEM_BOTTLE 0x12 // empty
 #define ITEM_MASK_BUNNY 0x39
 #define ITEM_NONE 0xFF
 #define SLOT_OCARINA 0 // SaveData.items
 #define SLOT_BOW 1
 #define SLOT_BOMB 6
+#define SLOT_PICTOGRAPH_BOX 13
 #define MASK_SLOTS_FIRST 24
 #define SLOT_MASK_BUNNY 32
 #define BOTTLE_SLOTS_FIRST 48
@@ -563,6 +565,14 @@ typedef struct PlayHud {
     /* 0x230 */ float opacity; // set every frame; PlayHud_Draw draws nothing at 0
 } PlayHud; // size = 0x234 (at least)
 
+// The main touch screen (gUiScreens[UI_SCREEN_MAIN], docs/hud.md "The view icon").
+typedef struct MainScreen {
+    /* 0x00 */ char unk_00[0x20];
+    /* 0x20 */ UiWidget* camChange; // cam_change: the eye, "View"
+    /* 0x24 */ UiWidget* camPicture; // cam_picture: the pictograph box
+    /* 0x28 */ UiWidget* camReturn; // cam_return: the camera, "Return"
+} MainScreen; // size = 0x2C (at least)
+
 // gUiCommonLayouts.
 #define UI_LAYOUT_TOUCH_PANEL 0 // Joker.Main.Play.TouchPanel: the main touch screen's HUD
 #define UI_LAYOUT_BACKGROUND 1
@@ -635,12 +645,17 @@ typedef struct MotionState {
 #define PLAYER_STATE_FLAGS_1 0x11DB0 // u32
 #define PLAYER_STATE1_FIRST_PERSON 0x100000
 #define PLAYER_STATE1_ITEM_AIMED 0x8 // an item is aimed (the bow); clear in the plain look
+#define PLAYER_VIEW_MODE 0x11DF1 // u8, PLAYER_VIEW_* (docs/hud.md "The view icon")
+#define PLAYER_VIEW_NONE 0
+#define PLAYER_VIEW_FIRST_PERSON 1
 #define PLAYER_LOOK_BASE 0x125B8 // s16[3]: focus.rot at the last motion reset
 #define PLAYER_LOOK_FLAGS 0x129BC // u32, PLAYER_LOOK_*
 #define PLAYER_LOOK_GYRO 0x1 // the gyroscope sets focus.rot; stays set after the look ends
 #define PLAYER_LOOK_FIRST_PERSON 0x2 // the player's draw sets it each frame the view is first person
 #define PLAYER_PAD 0x129CC // pointer to the pad state the player reads
 
+// Pictograph_IsOn's word: 1 while the pictograph box's view is up.
+extern int16_t gPictographOn; // 0x0068D302
 extern MotionState gMotionState; // 0x006B1DF4
 extern UiLayout* gUiCommonLayouts[UI_LAYOUT_COUNT]; // 0x006B7B8C
 extern LayoutDrawManager gLayoutDrawManager; // 0x0071B000
