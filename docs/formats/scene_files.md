@@ -17,6 +17,20 @@ place of a wrapped one (z3d-mods run mm-st2: East Clock Town from an unwrapped `
   entry. (Layout from noclip.website's `cmb.ts`, MIT; read and rewritten by z3d-mods'
   `tools/z3dmods/cmb.py`.)
 
+## Spawns, entrances and doors (scene commands 0x00, 0x06, 0x0E)
+The command's second byte is the count and its word the list's offset, as in the N64 games.
+- 0x00, the spawns: 16 bytes each, s16 actor id (0, the player), s16 x, y, z, three s16
+  rotations, u16 params.
+- 0x06, the entrances: two bytes each, the spawn and the room it loads. Woodfall Temple's
+  (`z2_miturin`) are (0, 2), (1, 11), (2, 11), (3, 2).
+- 0x0E, the doors between rooms: 16 bytes each, s8 room and u8 camera on one side, the same for
+  the other side, s16 actor id, s16 x, y, z, s16 turn, u16 params. The ids are 0x05 (seven in
+  `z2_kindan2` and `z2_hakashita`), 0x1D (Woodfall Temple's twelve between rooms), 0x17 (every
+  one of `z2_danpei`'s eight, and five between Woodfall Temple's rooms 10 and 1 at one height)
+  and 0xAC (four in Woodfall Temple with the same room on both sides). The actors behind the
+  ids are not read; none was opened in a run. A room behind a door loads without it through
+  `CommonData.respawn` (docs/save.md, "Respawn").
+
 ## Collision (scene command 0x03)
 The header is OoT3D's (decomp/oot3d `docs/notes/scene_collision.md`) with two more bytes before
 the bounds: the vertex count is at +0x0E and the triangle count at +0x10; the vertex list offset

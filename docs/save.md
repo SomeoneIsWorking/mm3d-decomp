@@ -44,6 +44,21 @@ went through (0xD890 at South Clock Town's owl statue, 0x5400 in Termina Field f
 - Two files saved from the same steps in two runs differ only in the 20 bytes at 0x1380 (small random digits that differ from run to run), their copy at 0x2E08, the checksum at 0x1A88 and the
   clock's seconds at 0x352B.
 
+## Respawn
+`CommonData.respawn` (+ 0x13628) holds eight `RespawnData` of 0x20 bytes and
+`CommonData.respawnFlag` (+ 0x13624) says which the next scene load uses: with n above 0 the
+scene starts from `respawn[n - 1]`, the player at its position and yaw in its room, and the flag
+is 0 again once the scene is up. Not saved: both lie past the file's 0x13618 bytes. Seen live
+(z3d-mods runs mm-dg0-boot, mm-dg1), the code that reads them is not decompiled:
+- At South Clock Town's owl statue (entrance 0xD890) entries 0 and 2 both hold
+  (-277, 100, -1630), yaw 0x8000, `playerParams` 0x0DFF, entrance 0xD800, room 0, and the byte
+  at + 0x13 is 1; the flag is 0.
+- With entry 0 written to (-1406, -1485, 400), yaw 0x8000, entrance 0x3000, room 3, the flag
+  to 1 and a scene transition to 0x3000 requested, Woodfall Temple loads with room 3 in place
+  of the entrance's room 2, Link stands at that position facing up the flight there, and
+  `PlayState.roomNum` (+ 0xC260) reads 3. Every room of the four scenes tried loads this way,
+  through no door.
+
 ## Unplaced fields, seen by filling them
 Not laid out yet; each was set to 0xFF throughout in a fresh file, in South Clock Town.
 - `SaveData` + 0x124C, 160 bytes: with the notebook owned, its list then holds events ("A Stay

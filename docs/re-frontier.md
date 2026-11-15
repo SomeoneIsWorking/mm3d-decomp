@@ -121,6 +121,14 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - evidence: the writer (PlayState.saveWriter) and CommonData.entrance / statueEntrance / statueSave read live: a statue save made from our patch at each scene's entrance writes save0.bin with statueSave 1 and that entrance, the writer's job is freed after each of 29 writes, and the file loads at that entrance with the saved clock (z3d-mods runs mm-q-as1, mm-q-as3, inputtest autosave-mm3d)
 - notes: the cycle save at 0x188270 (statueSave 0) is read, not run; the job's own type is unnamed
 
+### play.respawn — a scene load that starts from a respawn entry
+- status: re-partial
+- deps: none
+- evidence: CommonData.respawn and respawnFlag read at South Clock Town's owl statue and written live: entry 0 set to a position and room of Woodfall Temple, Beneath the Graveyard, z2_kindan2 and z2_danpei with the flag 1 loads that room with Link there, PlayState.roomNum the room written (z3d-mods runs mm-dg0-boot, mm-dg1, mm-dg12-*)
+- where: docs/save.md, docs/formats/scene_files.md, include/z3D.h
+- gap: the code that reads the flag is not decompiled; flags above 1, negative flags and RespawnData's last 13 bytes are unread; the door actors (ids 0x05, 0x1D, 0x17, 0xAC) and the switch flags that bar them are not read
+- notes: 
+
 ### actors.player — the actor lists, the player's position and the view
 - status: re-verified
 - deps: none

@@ -108,6 +108,18 @@ typedef struct SaveData {
 #define WEEK_EVENT_REGION_MAPS 0x23 // weekEventReg byte: bit n owns region n's map, the Map screen's loupe (docs/ui.md)
 #define REGION_MAP_COUNT 6
 
+// Where and how the player comes back into a scene (docs/save.md, "Respawn").
+typedef struct RespawnData {
+    /* 0x00 */ float pos[3];
+    /* 0x0C */ int16_t yaw;
+    /* 0x0E */ int16_t playerParams; // 0x0DFF at South Clock Town's owl statue
+    /* 0x10 */ uint16_t entrance;
+    /* 0x12 */ uint8_t room; // the room the scene loads first
+    /* 0x13 */ char unk_13[0xD];
+} RespawnData; // size = 0x20
+
+#define RESPAWN_COUNT 8
+
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene
     /* 0x00008 */ SaveData save;
@@ -119,7 +131,10 @@ typedef struct CommonData {
     /* 0x03520 */ uint8_t motionOff; // the Motion Controls option: 0 is on (docs/motion.md)
     /* 0x03521 */ char unk_03521[0x100FB];
     /* 0x1361C */ int32_t setup; // 1 on the title screen, 0 in play
-    /* 0x13620 */ char unk_13620[0x120];
+    /* 0x13620 */ char unk_13620[0x4];
+    /* 0x13624 */ int32_t respawnFlag; // n > 0: the next scene load starts from respawn[n - 1], then it is 0
+    /* 0x13628 */ RespawnData respawn[RESPAWN_COUNT];
+    /* 0x13728 */ char unk_13728[0x18];
     /* 0x13740 */ uint8_t buttonStatus[9]; // by EQUIP_BUTTON_*: BUTTON_ENABLED or BUTTON_DISABLED, set every frame
     /* 0x13749 */ char unk_13749[0x1];
     /* 0x1374A */ uint16_t nextHudVisibility; // set for a frame when the HUD is asked to change
@@ -308,7 +323,9 @@ typedef struct PlayState {
     /* 0x864A */ uint16_t aButtonDoAction; // DO_ACTION_*: the A button's word (docs/hud.md)
     /* 0x864C */ char unk_864C[0x26];
     /* 0x8672 */ int16_t aButtonAlpha; // PlayActionIcon_Update fades the A button toward it; not run
-    /* 0x8674 */ char unk_8674[0x3EB5];
+    /* 0x8674 */ char unk_8674[0x3BEC];
+    /* 0xC260 */ int8_t roomNum; // the room in play
+    /* 0xC261 */ char unk_C261[0x2C8];
     /* 0xC529 */ int8_t transitionTrigger; // 20 requests a scene transition
     /* 0xC52A */ char unk_C52A[0x4];
     /* 0xC52E */ int16_t nextEntrance;
