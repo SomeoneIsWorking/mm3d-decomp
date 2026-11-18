@@ -338,6 +338,31 @@ typedef struct PlayState {
 // Graph_DrawFrame's call of the frame end (Graph_FrameEnd, docs/frame.md), from its start.
 #define GRAPH_DRAW_FRAME_END_CALL 0xA04
 
+// nn::gx's command list (docs/frame.md), OoT3D's layout: a buffer of PICA commands and the
+// requests the frame end hands the GSP in order.
+typedef struct {
+    /* 0x00 */ uint32_t type; // the GSP GX command id: 1 run a command list, 3 display transfer
+    /* 0x04 */ uint32_t args[6]; // the GSP GX command's first six parameter words
+} GxRequest; // size = 0x1C
+
+typedef struct {
+    /* 0x00 */ uint32_t unk_00;
+    /* 0x04 */ uint32_t buffer;
+    /* 0x08 */ uint32_t bufferSize;
+    /* 0x0C */ uint32_t usedBytes;
+    /* 0x10 */ char unk_10[0x8];
+    /* 0x18 */ GxRequest* requests;
+    /* 0x1C */ uint32_t requestCapacity;
+    /* 0x20 */ uint32_t requestCount;
+    /* 0x24 */ char unk_24[0x20];
+} GxCmdlist; // size = 0x44
+
+typedef struct {
+    /* 0x00 */ char unk_00[0x9C];
+    /* 0x9C */ GxCmdlist* boundCmdlist; // the list nngxBindCmdlist (0x136A1C) bound, which draws append to
+} NngxState;
+extern NngxState gNngxState; // 0x007B2700
+
 // CommonData.hudVisibility (docs/ui.md); the names are the N64 game's.
 #define HUD_VISIBILITY_NONE 1
 #define HUD_VISIBILITY_NONE_ALT 2

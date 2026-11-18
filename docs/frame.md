@@ -17,6 +17,41 @@ installed base mod, loaded at 0x100000). The engine's shape is OoT3D's (decomp/o
   call here where OoT3D's is virtual. The frame end ends with `Graph_RunBoundCmdlist` (0x140B38),
   which runs the bound command list (`nngxRunCmdlist` 0x15BC00, the same 12 words as OoT3D's
   0x311954). Two more calls of the frame end come from 0x1250EC.
+- `Graph_RunBoundCmdlist` takes a pair at the frame end's `this` + 0xAC: an index and two list
+  ids. It binds the indexed one (`nngxBindCmdlist` 0x136A1C), runs it, flips the index and binds
+  the other: the command lists are double-buffered, as in OoT3D.
+- The command-list object is OoT3D's (`GxCmdlist`, `GxRequest` in include/z3D.h; nngxBindCmdlist
+  allocates 0x44 bytes for one); the bound one is `gNngxState.boundCmdlist` (0x7B2700 + 0x9C,
+  read by nngxRunCmdlist and written by nngxBindCmdlist).
+
+## What the draw section touches
 
 The draw section a replay runs again (z3d-mods docs/plans/replay-interpolation.md) is from
-`Play_Main` +0x160 to `Graph_DrawFrame` +0xA04. What it touches (its census) is not measured yet.
+`Play_Main` +0x160 to `Graph_DrawFrame` +0xA04. Measured in z3d-mods with the core's store journal
+(`interp census` and `probe`, a new file standing in South Clock Town after its first-visit
+cutscene, 2026-11-18), per tick:
+
+- About 195 pages stored to (OoT3D: 65), about 1.2 ms of host time, and about 490k instructions in
+  a replay: .data/.bss (0x600000-0x7FFFFF, about 28 pages), the 0x08xxxxxx heaps, the linear
+  heap's 0x14xxxxxx command lists and buffers, and its stack.
+- The bound list's requests: 23 command lists (GX 1), 2 `RequestDma` (GX 0), 1 memory fill (GX 2)
+  and the two screens' display transfers (GX 3).
+- SVCs on the section's thread (none of OoT3D's ArbitrateAddress signals):
+  - three `SendSyncRequest`s to `gsp::Gpu`, FlushDataCache (header 0x00080082, the wrapper
+    0x13F310): one from `Graph_DrawFrame` +0x9EC (0x107168, through 0x12F5EC, the size from
+    0x192DBC) just before the frame end, and two from 0x137A0C, a buffer upload (0x1BE090 through
+    0x16BB14).
+  - two `SleepThread`s (0x10FE54, through `nn::os::Thread::Sleep` 0x151CC4) of 100 us each:
+    0x199828 binds a vertex buffer (0x16B0A0, target 0x8892), uploads to it (0x1BE090) and then
+    sleeps, unconditionally. Its caller, 0x19733C (reached through a pointer), blends two byte
+    arrays by a float into the buffer (the loop at 0x197454) and uploads twice a tick.
+- Other threads store while the section runs (the window is preempted): their ArbitrateAddress
+  objects at 0x7C8D8C to 0x7C8DAC and in 0x15370000-0x15380000, the heap pages 0x152A0000-
+  0x152BA000 and 0x15BA1000-0x15BA3000, DSP memory 0x1FF53000-0x1FF77000, and IPC requests (fs among them) in
+  other threads' TLS, 0x1FF82C80 among them.
+- Run again from the same start state (t = 1, the replay answering FlushDataCache and SleepThread
+  itself), the requests and every PICA list are byte for byte the real ones in 180 of 180 ticks
+  (5.66 MB of lists). Memory equals the real run's in 91 of 180; the others differ only in the
+  page of 0x153730DC (where other threads' ArbitrateAddress objects sit) and the TLS page at
+  0x1FF82C80 (another thread's IPC command buffer, on the page the replay's FlushDataCache reply
+  stores to). Both are put down to the other writers above, not proven byte by byte.

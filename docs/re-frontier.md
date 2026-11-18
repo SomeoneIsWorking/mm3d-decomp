@@ -169,9 +169,9 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### frame.draw_section — the tick's draw and the frame end
 - status: re-partial
 - deps: 
-- evidence: disassembly of the installed code.bin: Play_Main calls Play_Update then Play_Draw; the game thread's loop calls Graph_DrawFrame, whose last call is the frame end that runs the bound command list (nngxRunCmdlist matched to OoT3D's by its bytes)
-- where: docs/frame.md
-- gap: the section's census (SVCs, pages, GX requests) and the t = 1 probe are not run; the command list object's address is not found
+- evidence: disassembly of the installed code.bin: Play_Main calls Play_Update then Play_Draw; the game thread's loop calls Graph_DrawFrame, whose last call is the frame end that runs the bound command list (nngxRunCmdlist matched to OoT3D's by its bytes); gNngxState (0x7B2700) from nngxRunCmdlist's literal; the section's census (SVCs with their callers, pages, GX requests) and a t = 1 replay giving the real requests and PICA lists byte for byte in 180 of 180 ticks (z3d-mods runs mm-interp-census, mm-interp-probe)
+- where: docs/frame.md, include/z3D.h
+- gap: the vertex blend at 0x19733C (what it draws); the camera, actor, skeleton, fade, material and effect fields a replay blends
 - notes: 
 
 ## motion
