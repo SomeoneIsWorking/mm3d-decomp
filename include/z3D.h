@@ -262,6 +262,28 @@ typedef struct ActorListEntry {
     /* 0x8 */ char unk_8[0x4];
 } ActorListEntry; // size = 0xC
 
+// One limb's pose relative to its parent, as the update leaves it (docs/actors.md "Skeletons").
+typedef struct SkelJoint {
+    /* 0x00 */ float mtx[3][4];
+    /* 0x30 */ uint32_t unk_30;
+} SkelJoint; // size = 0x34
+
+// An actor's skeleton (docs/actors.md "Skeletons"); the player's is at +0x334.
+typedef struct SkelAnime {
+    /* 0x00 */ char unk_00[0x34];
+    /* 0x34 */ void* model; // what SkelAnime_DrawOpa queues
+    /* 0x38 */ char unk_38[0x44];
+    /* 0x7C */ uint8_t limbCount;
+    /* 0x7D */ char unk_7D[0x3];
+    /* 0x80 */ SkelJoint* jointTable; // limbCount joints, posed in the update, read by the draw
+    /* 0x84 */ SkelJoint* unk_84; // a second joint table
+} SkelAnime; // size = 0x88 (at least)
+
+// The calls that queue a skeleton's model (r1 the SkelAnime), from the start of SkelAnime_DrawOpa
+// and of SkelAnime_DrawOpaEx, which takes one more word from its caller.
+#define SKELANIME_DRAW_OPA_QUEUE_CALL 0x48
+#define SKELANIME_DRAW_OPA_EX_QUEUE_CALL 0x40
+
 #define ACTORCAT_PLAYER 2
 #define ACTORCAT_COUNT 12
 
