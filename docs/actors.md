@@ -39,3 +39,10 @@ on it; the vanilla 1.1 code was not run (our addresses are for Project Restorati
 model by `world.pos` and `shape.rot` as they stand when it runs: a replay of the draw with both
 written between two ticks draws Link turned between them (z3d-mods run mm-act-on, crops
 `on-vs-off-link-36-47.png`). Actor_Draw itself is not found in this build yet.
+
+## The player's skeleton (seen in memory, not yet traced in code)
+In South Clock Town the player's `SkelAnime` sits at player + 0x338 (its play pointer at +0x10):
+the model at +0x28 (OoT3D's offset), a byte 0x1A at +0x78 (the limb count, OoT3D's +0x74) and at
++0x7C a pointer to player + 0xE18 (the joint table, OoT3D's +0x78), whose entries are 0x34 bytes
+holding a 3x4 matrix with orthonormal rows, as OoT3D's `SkelJoint`. Neither the draw that queues
+a skeleton nor OoT3D's queue function (0x4C7AB0) is found in this build by its bytes.
