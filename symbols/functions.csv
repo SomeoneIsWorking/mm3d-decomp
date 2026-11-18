@@ -19,6 +19,7 @@ vaddr,name
 0015f644,Play_Update
 0016ebac,func_0016EBAC
 001707cc,func_001707CC
+00171da0,Scene_UpdateRoomAnims
 00172004,TransitionFade_Draw
 0017419c,Cutscene_BeginScript
 00174640,Actor_UpdateAll
@@ -27,6 +28,7 @@ vaddr,name
 001846b4,Cutscene_ProcessCommands
 0018ad44,SaveFile_UpdateWrite
 0018da50,SaveFile_StartWrite
+00194ca8,AnimPlayerList_Update
 00195478,PlayHud_Draw
 001963c8,Message_DispatchControlCode
 001b049c,OLib_AddVecGeoToVec3f
@@ -51,6 +53,7 @@ vaddr,name
 0021c5ac,Player_UpdateLook
 0021d440,Inventory_SetAmmo
 002232f8,Motion_GetLook
+0022419c,AnimPlayer_Update
 00224ef8,Inventory_GetAmmo
 00228e5c,Motion_Reset
 0029b738,BgCheck_Allocate
@@ -70,6 +73,7 @@ vaddr,name
 005475a8,Inventory_IsMapVisible
 0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
+005ec198,AnimPlayer_Step
 005f9d04,PlayActionIcon_Update
 00607584,MessagePrinter_InstantOff
 00607604,MessagePrinter_InstantOn

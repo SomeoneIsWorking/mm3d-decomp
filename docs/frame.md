@@ -67,3 +67,25 @@ cutscene, 2026-11-18), per tick:
   `TransitionFade_Draw`, type 1; the fade out raises alpha 0x11, 0x44, 0x90 with the timer at +8
   stepping 4, 0x10, 0x22, to white; after the load the fade in lowers it from 0xEE through 0x6F to
   0 in black, and the mode goes back to 0. The fade flash stays at alpha 0.
+
+## Material animations
+
+- Texture scroll and the other material animations (CMAB files) play through `AnimPlayer`s (0xA4
+  bytes, vtable 0x63BF00, include/z3D.h). The scene's are stepped in the update, not the draw as
+  in OoT3D: `Play_Update` calls `Scene_UpdateRoomAnims` (0x171DA0, from 0x15FC3C), which for the
+  current room (`PlayState` +0xC260) and the previous one (+0xC2C4), while each is loaded (+7) and
+  bit 0 of `PlayState` +0xAAC is clear, runs `AnimPlayerList_Update` (0x194CA8) on the room's
+  list at +0x20, then the scene's update handler from the table at 0x69B098 (16-byte entries by
+  `PlayState` +0x14A, the function at +4).
+- `AnimPlayerList_Update` calls each player's `AnimPlayer_Update` (vtable +0xC, 0x22419C) at
+  +0x30 (`ANIM_PLAYER_LIST_UPDATE_CALL`, r0 the player). `AnimPlayer_Update` calls `AnimPlayer_Step`
+  (vtable +8, 0x5EC198) when `autoStep` is set, then applies the frame to each target, which
+  writes the materials the draw reads. `AnimPlayer_Step` adds `speed` to `frame`, wraps it at the
+  animation's frame count when `loop` is set (holds it there otherwise, setting `done`), and does
+  nothing while `paused` or the player's group bit (+0x1C) is set in the word at 0x6A3A18. The
+  frame count is the CMAB's: `anim->file` (+4 of the `CmabResource` at +0xC), its block at
+  `animOffset`, the count at the block's +4.
+- Found by a memory scan for a float stepping by the word after it each tick, then write watches
+  on it and on the game thread's stack (the step's pushed return addresses): South Clock Town's
+  room list holds one player (2400 frames, speed 1, looping), the actors' players are updated
+  elsewhere (`AnimPlayer_Update` returning to 0x224148).

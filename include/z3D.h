@@ -287,6 +287,56 @@ typedef struct SkelAnime {
 #define ACTORCAT_PLAYER 2
 #define ACTORCAT_COUNT 12
 
+// A CMAB material animation's file (docs/frame.md "Material animations"): the animation's block at
+// `animOffset` from its start.
+typedef struct CmabHeader {
+    /* 0x00 */ char magic[4]; // "cmab"
+    /* 0x04 */ char unk_04[0x10];
+    /* 0x14 */ uint32_t animOffset;
+} CmabHeader;
+
+typedef struct CmabAnim {
+    /* 0x0 */ int32_t unk_0;
+    /* 0x4 */ int32_t frameCount; // AnimPlayer_Step wraps or holds the frame here
+} CmabAnim;
+
+// A loaded CMAB, as an AnimPlayer holds it.
+typedef struct CmabResource {
+    /* 0x0 */ void* vtable;
+    /* 0x4 */ CmabHeader* file;
+} CmabResource;
+
+// A material animation playing on a model (docs/frame.md "Material animations"), vtable 0x63BF00.
+// AnimPlayer_Step adds `speed` to `frame`, wraps it at the animation's frame count when `loop` is
+// set and holds it at the end otherwise; AnimPlayer_Update steps it when `autoStep` is set, then
+// applies the frame to each target.
+typedef struct AnimPlayer {
+    /* 0x00 */ void* vtable;
+    /* 0x04 */ char unk_04[0x4];
+    /* 0x08 */ void* model;
+    /* 0x0C */ CmabResource* anim;
+    /* 0x10 */ float frame;
+    /* 0x14 */ float speed;
+    /* 0x18 */ uint8_t loop;
+    /* 0x19 */ uint8_t paused; // no step while set, nor while its group's bit is in 0x6A3A18
+    /* 0x1A */ uint8_t done; // the frame reached the end
+    /* 0x1B */ uint8_t autoStep;
+    /* 0x1C */ uint8_t group;
+    /* 0x1D */ char unk_1D[0x3];
+    /* 0x20 */ void* targets[32];
+    /* 0xA0 */ int32_t targetCount;
+} AnimPlayer; // size = 0xA4
+
+// A model's material animations, updated together by AnimPlayerList_Update.
+typedef struct AnimPlayerList {
+    /* 0x0 */ uint16_t count;
+    /* 0x2 */ char unk_2[0x2];
+    /* 0x4 */ AnimPlayer* players; // `count` of them
+} AnimPlayerList;
+
+// AnimPlayerList_Update's call of each player's AnimPlayer_Update (r0 the player), from its start.
+#define ANIM_PLAYER_LIST_UPDATE_CALL 0x30
+
 typedef struct ActorContext {
     /* 0x00 */ char unk_00[0x10];
     /* 0x10 */ ActorListEntry actorLists[ACTORCAT_COUNT];
