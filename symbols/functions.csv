@@ -19,6 +19,7 @@ vaddr,name
 0015f644,Play_Update
 0016ebac,func_0016EBAC
 001707cc,func_001707CC
+00172004,TransitionFade_Draw
 0017419c,Cutscene_BeginScript
 00174640,Actor_UpdateAll
 0017ec58,LayoutDrawManager_Draw

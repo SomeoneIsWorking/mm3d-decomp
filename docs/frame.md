@@ -55,3 +55,15 @@ cutscene, 2026-11-18), per tick:
   page of 0x153730DC (where other threads' ArbitrateAddress objects sit) and the TLS page at
   0x1FF82C80 (another thread's IPC command buffer, on the page the replay's FlushDataCache reply
   stores to). Both are put down to the other writers above, not proven byte by byte.
+
+## Fades
+
+- A scene's fade is the transition's screen fill, OoT3D's `TransitionFade`. `Play_Draw` calls
+  `PlayState.transitionCtx.draw` (+0xC860 + 0x234) on the instance at +0xC860 while
+  `transitionMode` (+0xC85A) is 3 or 0xB, then `TransitionFade_Draw` (0x172004) on
+  `transitionFadeFlash` (+0xCAAC). `TransitionFade_Draw` skips a fill whose alpha (+4) is 0 and
+  draws it in the colour at +4, alpha first.
+- A warp to South Clock Town (entrance 0xD800, run mm-fade-peek): the draw is
+  `TransitionFade_Draw`, type 1; the fade out raises alpha 0x11, 0x44, 0x90 with the timer at +8
+  stepping 4, 0x10, 0x22, to white; after the load the fade in lowers it from 0xEE through 0x6F to
+  0 in black, and the mode goes back to 0. The fade flash stays at alpha 0.

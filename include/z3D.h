@@ -347,6 +347,30 @@ typedef struct SaveWriter {
 // An entrance is scene << 9 | spawn << 4 | layer; a statue's entrance has layer 0.
 #define ENTRANCE_LAYER_MASK 0xF
 
+// A screen fill faded in or out (docs/frame.md "Fades"), OoT3D's layout.
+typedef struct {
+    /* 0x0 */ uint8_t type;
+    /* 0x1 */ uint8_t isDone;
+    /* 0x2 */ uint8_t direction;
+    /* 0x3 */ char unk_3;
+    /* 0x4 */ uint8_t a; // the fill's colour, alpha first; TransitionFade_Draw skips a fill with alpha 0
+    /* 0x5 */ uint8_t b;
+    /* 0x6 */ uint8_t g;
+    /* 0x7 */ uint8_t r;
+    /* 0x8 */ uint16_t timer;
+    /* 0xA */ char unk_A[0x2];
+} TransitionFade; // size = 0xC
+
+// The scene transition (docs/frame.md "Fades"): its instance, a TransitionFade while `draw` is
+// TransitionFade_Draw.
+typedef struct {
+    /* 0x000 */ union {
+        TransitionFade fade;
+        char data[0x234];
+    } instanceData;
+    /* 0x234 */ void* draw; // void (*)(void* instance)
+} TransitionContext; // size = 0x238 (at least)
+
 typedef struct PlayState {
     /* 0x0000 */ char unk_0000[0x30];
     /* 0x0030 */ uint32_t buttonsHeld; // pad bits; bit 12 passes through from the pad
@@ -379,6 +403,12 @@ typedef struct PlayState {
     /* 0xC529 */ int8_t transitionTrigger; // 20 requests a scene transition
     /* 0xC52A */ char unk_C52A[0x4];
     /* 0xC52E */ int16_t nextEntrance;
+    /* 0xC530 */ char unk_C530[0x32A];
+    /* 0xC85A */ uint8_t transitionMode; // Play_Draw draws transitionCtx in 3 and 0xB
+    /* 0xC85B */ char unk_C85B[0x5];
+    /* 0xC860 */ TransitionContext transitionCtx;
+    /* 0xCA98 */ char unk_CA98[0x14];
+    /* 0xCAAC */ TransitionFade transitionFadeFlash; // drawn by TransitionFade_Draw after the transition
 } PlayState;
 
 // Play_Main's call of Play_Draw (docs/frame.md), from the function's start.
