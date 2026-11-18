@@ -56,3 +56,20 @@ the same turn back moved it by +3642. A turn of 1820 up moved its pitch by +1789
 - `PlayState.frames` (+0x138) counts the game state's ticks (0x10676C, from the game thread's
   loop); a warp starts it from 0 again (run mm-frames-warp: 0x20E in the old scene, 0x41 three
   seconds into the new one).
+
+## The door camera
+
+- `Camera_Update` (0x180CC4) runs the function `sCameraSettings[setting].cameraModes[mode]
+  .funcIdx` names in `sCameraFunctions` (0x667D38): `Camera.setting` (+0x156) and `Camera.mode`
+  (+0x158) index the settings (0x667894, 12 bytes each, the modes at +8) and the modes (8 bytes,
+  the function index first).
+- A door within a scene switches the camera to setting 0x8, mode 0, whose function is 70,
+  `Camera_Special9` (0x470818), the N64 game's door camera. Its step is `Camera.animState`
+  (+0x172): 0, 10 or 20 starts it; 1 counts the door's timer down; when that runs out it becomes
+  2 in the same update that puts the eye beyond the door (`CAM_SPEC9_ANIM_FAR_SIDE`); 3 to 5 then
+  swing the eye back behind Link.
+- Woodfall Temple's first door (state `mayor` in z3d-mods: Link put at 0,-1185,745, within 50 of
+  the door at z 720, then A; run wf-door-4): `animState` held 1 for 15 ticks, and in tick 285 it
+  became 2 and the eye went from z 974 to 569, through the door; from tick 299 the eye moved on
+  by 20 to 60 a tick. Link walked against the door stops at 50.6 from it, and the door's prompt
+  wants him nearer, so walking alone does not open it.

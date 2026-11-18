@@ -25,6 +25,7 @@ vaddr,name
 00174640,Actor_UpdateAll
 0017ec58,LayoutDrawManager_Draw
 0017ec80,Message_ParseText
+00180cc4,Camera_Update
 001846b4,Cutscene_ProcessCommands
 0018ad44,SaveFile_UpdateWrite
 0018da50,SaveFile_StartWrite
@@ -62,12 +63,13 @@ vaddr,name
 002b8c64,BgCheck_InitializeStaticLookup
 00317000,Play_SaveAtStatue
 00346ab0,SaveFile_Load
-003780b0,SkelAnime_DrawOpaEx
 0036debc,Minimap_Draw
+003780b0,SkelAnime_DrawOpaEx
 003f1a4c,CutsceneHandler_RunScript
 0043a950,StaticLookup_AddPolyToSSList
 0043e818,SaveFile_StartWriteSlot
 0046fad4,Camera_Follow
+00470818,Camera_Special9
 0048abd0,Scene_CommandCollisionHeader
 004affe0,Pictograph_IsOn
 004cf9c4,CutsceneHandler_StartScript

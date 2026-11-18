@@ -364,8 +364,33 @@ typedef struct Camera {
     /* 0x074 */ Vec3f eyeNext; // before collision
     /* 0x080 */ char unk_080[0x20];
     /* 0x0A0 */ struct PlayState* play;
-    /* 0x0A4 */ char unk_0A4[0xF4];
+    /* 0x0A4 */ char unk_0A4[0xB2];
+    /* 0x156 */ int16_t setting; // an index of sCameraSettings
+    /* 0x158 */ int16_t mode; // an index of the setting's cameraModes
+    /* 0x15A */ char unk_15A[0x18];
+    /* 0x172 */ int16_t animState; // the camera function's step
+    /* 0x174 */ char unk_174[0x24];
 } Camera; // size = 0x198
+
+// Indices into sCameraFunctions (0x667D38), in the N64 order.
+#define CAM_FUNC_SPEC9 70 // Camera_Special9 (0x470818), the room door camera
+
+// Camera_Special9's animState when it has moved the eye to the door's far side.
+#define CAM_SPEC9_ANIM_FAR_SIDE 2
+
+// Camera_Update (0x180CC4) runs sCameraFunctions[sCameraSettings[setting].cameraModes[mode].funcIdx].
+typedef struct {
+    /* 0x00 */ int16_t funcIdx;
+    /* 0x02 */ int16_t valueCnt;
+    /* 0x04 */ void* values;
+} CameraMode; // size = 0x8
+
+typedef struct {
+    /* 0x00 */ char unk_00[0x8];
+    /* 0x08 */ CameraMode* cameraModes;
+} CameraSetting; // size = 0xC
+
+extern CameraSetting sCameraSettings[]; // 0x00667894
 
 // The view the frame is drawn from (docs/camera.md "The view"), the N64 game's layout as far as
 // it is known. Camera_Update ends with View_LookAt (0x184618) writing eye, at and up.
