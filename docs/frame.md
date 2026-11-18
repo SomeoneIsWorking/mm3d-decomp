@@ -135,3 +135,16 @@ cutscene, 2026-11-18), per tick:
   on it and on the game thread's stack (the step's pushed return addresses): South Clock Town's
   room list holds one player (2400 frames, speed 1, looping), the actors' players are updated
   elsewhere (`AnimPlayer_Update` returning to 0x224148).
+- A model's own material animation is the `AnimPlayer` at the model's +0x98: `Model_Update`
+  (0x2240EC) calls its update through the vtable at +0x58 (`MODEL_UPDATE_MATERIAL_CALL`, r0 the
+  player), between its other parts' updates (+0x94, +0x90, then +0xA0's). The Southern Swamp's
+  far water band (entrance 0x8410, by the Tourist Center's bridge) is such a model's, a player
+  in the linear heap on the room's 2400-frame animation, frame for frame. It is stepped in the
+  draw section: its frame reads one less at the section's start than at its close, every tick
+  (run swamp-mat), and holding it halves the band's change a tick (2.5 to 1.1 mean, run
+  freeze-ap2), while holding the room's player, `gameplayFrames` or the camera changes nothing.
+  In the swamp the section's thread makes no `Model_Update` call between sections; two a tick
+  come from the section.
+- Other calls of `AnimPlayer_Update` in the swamp's section: 0x208644 (a frame set first, from
+  +0xBF8 of r6, at 0x208638) and 0x21B314 (a loop over three players at +4 of r5, 0xA4 apart),
+  three players a tick between them.

@@ -55,6 +55,7 @@ vaddr,name
 0021c5ac,Player_UpdateLook
 0021d440,Inventory_SetAmmo
 002232f8,Motion_GetLook
+002240ec,Model_Update
 0022419c,AnimPlayer_Update
 00224ef8,Inventory_GetAmmo
 00228e5c,Motion_Reset

@@ -367,6 +367,9 @@ typedef struct AnimPlayerList {
 
 // AnimPlayerList_Update's call of each player's AnimPlayer_Update (r0 the player), from its start.
 #define ANIM_PLAYER_LIST_UPDATE_CALL 0x30
+// Model_Update's call of its material animation's update through the player's vtable (r0 the
+// player at the model's +0x98, r1 the method: AnimPlayer_Update for an AnimPlayer), from its start.
+#define MODEL_UPDATE_MATERIAL_CALL 0x58
 
 typedef struct ActorContext {
     /* 0x00 */ char unk_00[0x10];
