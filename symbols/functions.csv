@@ -28,6 +28,7 @@ vaddr,name
 001846b4,Cutscene_ProcessCommands
 0018ad44,SaveFile_UpdateWrite
 0018da50,SaveFile_StartWrite
+0018f488,Target_Draw
 00194ca8,AnimPlayerList_Update
 00195478,PlayHud_Draw
 001963c8,Message_DispatchControlCode

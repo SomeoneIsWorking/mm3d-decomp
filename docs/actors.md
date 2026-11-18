@@ -62,3 +62,13 @@ deferred draw (0x5EDC40) walks the limbs: the player's limb controller (vtable 0
 the actor's joint table (0x5BF8FC, `player + 0x3B4`, the `SkelAnime`'s +0x80), runs the override,
 and 0x5EB6A8 multiplies it onto the parent's. A replay of the draw with the joint table written
 between two ticks draws the pose between them (z3d-mods run mm-skel-on).
+
+## The target arrow
+The spinning green arrow over South Clock Town's owl statue is the Z-target arrow, not an actor
+of its own: `Target_Draw` (0x18F488, the N64 game's) draws it from `func_001707CC` (+0x50) with
+`actorCtx` +0x120 (`PlayState` +0x21D0) and the play state. It builds the arrow's matrix in the
+draw: a turn about Y of `gameplayFrames` (`PlayState` +0xC4BC, one a tick) times 3000 binary
+angles (0x177 * 8 at 0x18FC80), then writes it into each of its two models (+0xAC, +0xB0) and
+queues them (0x20AAA8). Moving the owl statue moves it; nothing in the statue's actor or models
+steps, and holding the vblank counters only changes it by stalling ticks (z3d-mods runs
+mm-rupee-*, mm-rupee-mtx: write watches on the arrow model's matrix stop at 0x18FD0C).
