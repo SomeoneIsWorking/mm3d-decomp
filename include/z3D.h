@@ -521,6 +521,12 @@ typedef struct PlayState {
 #define PLAY_MAIN_DRAW_CALL 0x160
 // Graph_DrawFrame's call of the frame end (Graph_FrameEnd, docs/frame.md), from its start.
 #define GRAPH_DRAW_FRAME_END_CALL 0xA04
+// Target_Draw's turn of the arrow (docs/actors.md "The target arrow"), from its start: the angle
+// moved to s0, then made a float.
+#define TARGET_DRAW_ARROW_TURN_MOVE 0x814
+#define TARGET_DRAW_ARROW_TURN_CONVERT 0x820
+// The arrow's turn each tick, in binary angles.
+#define TARGET_ARROW_TURN_STEP 3000
 
 // nn::gx's command list (docs/frame.md), OoT3D's layout: a buffer of PICA commands and the
 // requests the frame end hands the GSP in order.

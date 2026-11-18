@@ -72,3 +72,6 @@ angles (0x177 * 8 at 0x18FC80), then writes it into each of its two models (+0xA
 queues them (0x20AAA8). Moving the owl statue moves it; nothing in the statue's actor or models
 steps, and holding the vblank counters only changes it by stalling ticks (z3d-mods runs
 mm-rupee-*, mm-rupee-mtx: write watches on the arrow model's matrix stop at 0x18FD0C).
+The angle, `(gameplayFrames * 0x177 << 3) & 0xFFFF` in r0, is moved to s0 at +0x814
+(`TARGET_DRAW_ARROW_TURN_MOVE`), made a float at +0x820 (`TARGET_DRAW_ARROW_TURN_CONVERT`) and
+scaled by the unit in s1 for `Matrix_RotateY` (0x226330).
