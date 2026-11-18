@@ -32,3 +32,10 @@ before, at (-261, 110, -1673) while he plays, and then eases out along that line
 (-229, 114, -1756), 126 in front of him, where it stays until he walks; then it swings behind.
 Link's position and yaw do not change. Seen with Project Restoration alone and with our patch
 on it; the vanilla 1.1 code was not run (our addresses are for Project Restoration's bake).
+
+## The model's place in the draw
+`Actor.shape.rot` (+0xC0, three s16) is the model's rotation: the player's yaw there follows
+`world.rot`'s (-16117 against -16118 standing in South Clock Town). The draw places each actor's
+model by `world.pos` and `shape.rot` as they stand when it runs: a replay of the draw with both
+written between two ticks draws Link turned between them (z3d-mods run mm-act-on, crops
+`on-vs-off-link-36-47.png`). Actor_Draw itself is not found in this build yet.

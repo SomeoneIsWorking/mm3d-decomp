@@ -223,6 +223,11 @@ typedef struct PosRot {
     /* 0x0C */ int16_t rot[3];
 } PosRot; // size = 0x14
 
+// How an actor's model is placed (docs/actors.md); the N64 game's ActorShape, as far as it is read.
+typedef struct ActorShape {
+    /* 0x0 */ int16_t rot[3]; // the model's rotation; the player's yaw follows world.rot's
+} ActorShape; // size = 0x6 (at least)
+
 // The start of every actor (docs/actors.md); the names are the N64 game's.
 typedef struct Actor {
     /* 0x000 */ int16_t id; // 0 is the player
@@ -240,7 +245,9 @@ typedef struct Actor {
     /* 0x070 */ float speed;
     /* 0x074 */ float gravity;
     /* 0x078 */ float terminalVelocity;
-    /* 0x07C */ char unk_07C[0x90];
+    /* 0x07C */ char unk_07C[0x44];
+    /* 0x0C0 */ ActorShape shape;
+    /* 0x0C6 */ char unk_0C6[0x46];
     /* 0x10C */ Vec3f prevPos; // world.pos before this frame's update
     /* 0x118 */ char unk_118[0x2];
     /* 0x11A */ uint16_t textId; // the message a check or a talk opens
