@@ -39,3 +39,20 @@ statue the patch makes `Input_CStickNeutral` read as not neutral while a turn is
 turns eyeNext at the start of `Camera_Follow`. Runs `mm-q-mouse7` and `mm-q-mouse8` measured
 this. A turn of 3641 binary angles right moved the direction at +0x148 by -3626 in yaw, and
 the same turn back moved it by +3642. A turn of 1820 up moved its pitch by +1789.
+
+## The view
+
+- `PlayState.view` (+0x1F8) is the N64 game's `View` as far as it is read: `fovy` +0x18 (45.17 in
+  South Clock Town), `zNear` +0x1C (5), `zFar` +0x20 (20000), `scale` +0x24 (1), `eye` +0x28,
+  `at` +0x34, `up` +0x40.
+- The camera's update ends at 0x181BD0: it writes `view.scale` and `view.fovy`, then calls
+  `View_LookAt` (0x184618, OoT3D's 0x2D77DC with the N64 offsets) on `camera->play->view` with
+  the eye, at and up it made. Write watches on the view's eye and up stop only there.
+- Standing in South Clock Town the view's eye is the main camera's `eye`, and its at the
+  camera's `at` within 0.02.
+- `PlayState.cameraPtrs` (+0xA68) holds the main camera (play + 0x408) first;
+  `PlayState.activeCamera` (+0xA78) is the index the view follows: 0 in play, 1 during South
+  Clock Town's arrival cutscene with a second camera in `cameraPtrs[1]` (run mm-cs-cams).
+- `PlayState.frames` (+0x138) counts the game state's ticks (0x10676C, from the game thread's
+  loop); a warp starts it from 0 again (run mm-frames-warp: 0x20E in the old scene, 0x41 three
+  seconds into the new one).

@@ -288,6 +288,21 @@ typedef struct Camera {
     /* 0x0A4 */ char unk_0A4[0xF4];
 } Camera; // size = 0x198
 
+// The view the frame is drawn from (docs/camera.md "The view"), the N64 game's layout as far as
+// it is known. Camera_Update ends with View_LookAt (0x184618) writing eye, at and up.
+typedef struct View {
+    /* 0x00 */ char unk_00[0x18];
+    /* 0x18 */ float fovy; // degrees
+    /* 0x1C */ float zNear;
+    /* 0x20 */ float zFar;
+    /* 0x24 */ float scale;
+    /* 0x28 */ Vec3f eye;
+    /* 0x34 */ Vec3f at;
+    /* 0x40 */ Vec3f up;
+} View; // size = 0x4C (at least)
+
+#define CAMERA_COUNT 4
+
 // Writes a built file to save<n>.bin as a job; SaveFile_UpdateWrite frees the job once done.
 typedef struct SaveWriter {
     /* 0x00 */ void* job;
@@ -307,14 +322,18 @@ typedef struct PlayState {
     /* 0x0000 */ char unk_0000[0x30];
     /* 0x0030 */ uint32_t buttonsHeld; // pad bits; bit 12 passes through from the pad
     /* 0x0034 */ uint32_t buttonsPressed; // pressed this frame; bit 3 is Start
-    /* 0x0038 */ char unk_0038[0x110];
+    /* 0x0038 */ char unk_0038[0x100];
+    /* 0x0138 */ uint32_t frames; // the game state's ticks (counted by 0x10676C), from 0 again in a new scene
+    /* 0x013C */ char unk_013C[0xC];
     /* 0x0148 */ int16_t sceneNum;
-    /* 0x014A */ char unk_014A[0xD6];
-    /* 0x0220 */ Vec3f viewEye; // where the frame is drawn from (docs/actors.md)
-    /* 0x022C */ Vec3f viewAt; // and the point it looks at
-    /* 0x0238 */ char unk_0238[0x1D0];
+    /* 0x014A */ char unk_014A[0xAE];
+    /* 0x01F8 */ View view; // the eye is where the frame is drawn from (docs/actors.md)
+    /* 0x0244 */ char unk_0244[0x1C4];
     /* 0x0408 */ Camera mainCamera;
-    /* 0x05A0 */ char unk_05A0[0x1B10];
+    /* 0x05A0 */ char unk_05A0[0x4C8];
+    /* 0x0A68 */ Camera* cameraPtrs[CAMERA_COUNT]; // the main camera first
+    /* 0x0A78 */ int16_t activeCamera; // the index of the camera the view follows
+    /* 0x0A7A */ char unk_0A7A[0x1636];
     /* 0x20B0 */ ActorContext actorCtx;
     /* 0x2150 */ char unk_2150[0x2D8];
     /* 0x2428 */ CutsceneContext csCtx;
