@@ -166,6 +166,14 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 - where: docs/hud.md, include/z3D.h, symbols/functions.csv
 - gap: the clock's own widget; a code patch seen working; dialog boxes with the HUD hidden
 
+### frame.draw_section — the tick's draw and the frame end
+- status: re-partial
+- deps: 
+- evidence: disassembly of the installed code.bin: Play_Main calls Play_Update then Play_Draw; the game thread's loop calls Graph_DrawFrame, whose last call is the frame end that runs the bound command list (nngxRunCmdlist matched to OoT3D's by its bytes)
+- where: docs/frame.md
+- gap: the section's census (SVCs, pages, GX requests) and the t = 1 probe are not run; the command list object's address is not found
+- notes: 
+
 ## motion
 
 ### motion.look — what the first-person look reads of the gyroscope

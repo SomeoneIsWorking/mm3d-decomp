@@ -333,6 +333,11 @@ typedef struct PlayState {
     /* 0xC52E */ int16_t nextEntrance;
 } PlayState;
 
+// Play_Main's call of Play_Draw (docs/frame.md), from the function's start.
+#define PLAY_MAIN_DRAW_CALL 0x160
+// Graph_DrawFrame's call of the frame end (Graph_FrameEnd, docs/frame.md), from its start.
+#define GRAPH_DRAW_FRAME_END_CALL 0xA04
+
 // CommonData.hudVisibility (docs/ui.md); the names are the N64 game's.
 #define HUD_VISIBILITY_NONE 1
 #define HUD_VISIBILITY_NONE_ALT 2
