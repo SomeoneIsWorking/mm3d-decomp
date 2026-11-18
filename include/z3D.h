@@ -553,6 +553,16 @@ typedef struct {
 } NngxState;
 extern NngxState gNngxState; // 0x007B2700
 
+// nn::os::CriticalSection (docs/frame.md "The GSP interrupt lock"): enter 0x192D3C, leave 0x192D9C.
+typedef struct {
+    /* 0x00 */ int32_t event; // a light event: 1 free, -1 held, one lower for each thread waiting
+    /* 0x04 */ uint32_t ownerTls; // the holding thread's TLS address
+    /* 0x08 */ uint32_t count; // the holder's nested entries
+} OsCriticalSection; // size = 0xC
+
+// nngx's GSP interrupt dispatcher's lock, which its interrupt thread holds while it runs a callback.
+extern OsCriticalSection gGspInterruptLock; // 0x007C0F50
+
 // CommonData.hudVisibility (docs/ui.md); the names are the N64 game's.
 #define HUD_VISIBILITY_NONE 1
 #define HUD_VISIBILITY_NONE_ALT 2

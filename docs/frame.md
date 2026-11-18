@@ -78,6 +78,30 @@ cutscene, 2026-11-18), per tick:
   0x1FF82C80 (another thread's IPC command buffer, on the page the replay's FlushDataCache reply
   stores to). Both are put down to the other writers above, not proven byte by byte.
 
+## The GSP interrupt lock
+
+- `gGspInterruptLock` (0x7C0F50) is an nn::os critical section (`OsCriticalSection`): a light
+  event, the holder's TLS address and its nested entries. Enter (0x192D3C) takes the event unless
+  the caller holds it already (0x13C5D0 tries it, then waits with ArbitrateAddress WaitIfLessThan
+  0, the call at 0x13C67C); leave (0x192D9C) gives it back at the last entry (0x13C54C signals one
+  waiter). Event 1 is free, -1 held, one lower for each waiter.
+- It heads nngx's GSP interrupt dispatcher, which the interrupt thread's function (0x154194) gets
+  as its argument: the interrupt event's handle at +0x2C, the callbacks by interrupt from +0x10, an
+  event at +0x64 and a state byte at +0x76.
+- The interrupt thread (priority 26, TLS 0x1FF82800 in a title-screen run) loops in 0x154194: it
+  waits on the interrupt event (WaitSynchronization1 at 0x1541B8) and clears it, then under the
+  lock (enter 0x154294, leave 0x1542C8) runs the interrupt's callback, sets the state byte to 2 and
+  signals the event at +0x64 (0x17AA5C) when the byte was 1. The callback ends in GetSystemTick
+  (0x5E5550), whose wrapper stores the time at 0x6A3A10.
+- 0x137910, which the interrupt callbacks branch to (from 0x129F5C to 0x129FF8), takes the lock
+  (0x12F7F8), steps the request index (+0x28) of the list at `gNngxState` +0xA0, the one running,
+  and runs its next request: the interrupt thread runs the previous tick's list while the draw
+  section fills the bound one.
+- On the title screen (2026-11-18, run title-census from boot) the draw section's thread waits on
+  the lock 755 times in 90 sections and the interrupt thread leaves it 1045 times meanwhile; at
+  every section's start (60 of 60) the interrupt thread holds it (event -1, one entry) and at the
+  close it is free. In play in South Clock Town the section never waits on it.
+
 ## Fades
 
 - A scene's fade is the transition's screen fill, OoT3D's `TransitionFade`. `Play_Draw` calls
