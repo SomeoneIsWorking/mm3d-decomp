@@ -26,6 +26,24 @@ A command is `CsCmdHeader` (u32 id, s32 count) and `count` entries:
 - 90 (camera): `count` is the byte length of the data that follows;
 - everything else, known to the interpreter or not: 8 bytes each.
 
+## The camera's shots
+- Command 90 calls `CutsceneCamera_UpdateSplines` (0x1AD820, the N64 game's) with the command's
+  data and `sCutsceneCameraInfo` (0x78A8A4, `CutsceneCamera` in `include/z3D.h`) each frame. A
+  spline's header gives its point count and duration; its points are 12 bytes each, the eye's
+  then at's. Each of the two interpolators (+0x30, +0xF8) walks the points a group at a time:
+  `group` (+0xC) is the group's first point, `groupCount` (+0x8) its size, `type` (+0xD) its
+  interpolation, and `waypoint` (+0x6) the point within it.
+- A new group is a new shot. In the tick that reaches the end of a group the interpolator stamps
+  the next group's first point with `type` 8 (`CS_CAM_GROUP_PENDING`) and the camera stays; in
+  the next tick it reads the group's type and the eye moves to the new shot at once.
+- The Southern Swamp's first visit (z3d-mods run mm-shots-2: harness state `sct`, a new file,
+  then `warp:0x8400`): one spline of 15 points and 272 frames. Groups: points 0 to 5 type 4, the
+  waypoint stepping at ticks 41 and 74 with the eye moving on by 1; point 6 type 1, stamped at
+  tick 106 and read at 107, where the eye jumps 541; point 7 on type 4, stamped at 166 and read
+  at 167, the eye jumping 1826. `splineIndex` stays 0 through it, so a spline is not a shot.
+  The eye's other jump, 1172 between ticks 8 and 9 as the cutscene starts, is under the warp's
+  white fade-in.
+
 ## Text inside a cutscene
 - `CsCmdText`: text id, start frame, end frame, type, two alternate text ids (0xFFFF: none). The
   box opens after the start frame; at the end frame the interpreter steps `frames` back by one

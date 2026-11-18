@@ -187,6 +187,37 @@ typedef struct CsCmdActorCue {
 
 #define CS_CMD_TEXT 10
 #define CS_CMD_CAMERA 90
+
+// Command 90's camera (docs/cutscene.md "The camera's shots"): CutsceneCamera_UpdateSplines
+// (0x1AD820) steps an interpolator for the eye and one for at through the command's points, a
+// group of points (a shot) at a time.
+typedef struct {
+    /* 0x00 */ char unk_00[0x4];
+    /* 0x04 */ int16_t curFrame;
+    /* 0x06 */ int16_t waypoint; // in the group
+    /* 0x08 */ int16_t groupCount; // the group's points
+    /* 0x0A */ int16_t numEntries;
+    /* 0x0C */ uint8_t group; // the group's first point
+    /* 0x0D */ uint8_t type; // the group's interpolation; CS_CAM_GROUP_PENDING until it is read
+    /* 0x0E */ char unk_0E[0xBA];
+} CutsceneCameraInterp; // size = 0xC8
+
+#define CS_CAM_GROUP_PENDING 8
+
+typedef struct {
+    /* 0x00 */ int16_t splineIndex;
+    /* 0x02 */ int16_t cmdIndex; // the next spline's offset in the command's data
+    /* 0x04 */ int16_t splineNeedsInit;
+    /* 0x06 */ int16_t state;
+    /* 0x08 */ int16_t nextSplineTimer;
+    /* 0x0A */ int16_t updateSplineTimer;
+    /* 0x0C */ int16_t duration;
+    /* 0x0E */ char unk_0E[0x22];
+    /* 0x30 */ CutsceneCameraInterp eyeInterp;
+    /* 0xF8 */ CutsceneCameraInterp atInterp;
+} CutsceneCamera; // size = 0x1C0 (at least)
+
+extern CutsceneCamera sCutsceneCameraInfo; // 0x0078A8A4
 // Actor cue lists: 100..149, 200 (the player), 201 and 450..599.
 #define CS_CMD_ACTOR_CUE_FIRST 100
 #define CS_CMD_ACTOR_CUE_COUNT 50
