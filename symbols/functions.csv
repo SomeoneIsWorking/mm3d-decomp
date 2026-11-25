@@ -7,13 +7,16 @@ vaddr,name
 00114518,GyroscopeReader_Read
 00114644,GyroscopeReader_SetZeroDriftMode
 00114898,GyroscopeReader_Reset
+001161b4,Input_ReadTouch
 00121fb0,GyroscopeReader_ReadLocal
+00122678,TouchPanelReader_ReadLatest
 00124ee8,Graph_FrameEnd
 00126810,LayoutDrawManager_DrawQueue
 0012e10c,GyroscopeReader_UpdateDirection
 0012e2d8,GyroscopeReader_CalculateAxis
 0012e494,GyroscopeReader_ReviseDirection
 00133930,GzfFont_Init
+0013be78,UiLayout_FindWidget
 00140b38,Graph_RunBoundCmdlist
 0014f698,Play_Main
 0015bc00,nngxRunCmdlist
@@ -80,7 +83,10 @@ vaddr,name
 0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
 005a81ec,TitleScreen_Draw
+005b821c,FileSelectScreen_UpdateStart
 005ba0dc,FileSelectScreen_Draw
+005ba3bc,FileSelectScreen_Init
+005bb448,FileSelectScreen_Update
 005ec198,AnimPlayer_Step
 005f9d04,PlayActionIcon_Update
 00607584,MessagePrinter_InstantOff

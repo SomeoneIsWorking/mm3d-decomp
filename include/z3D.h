@@ -591,7 +591,11 @@ typedef struct UiDialogLayout {
     /* 0x3F4 */ struct UiWidget* blackScreen; // black_screen_g, the touch screen's 320x240 from its top left
 } UiDialogLayout; // size = 0x3F8 (at least)
 
-// File select's list on the touch screen (vtable 0x63C7F4).
+// File select's list on the touch screen (vtable 0x63C7F4). Its groups and panes are found by name
+// (UiLayout_FindWidget): start_g holds the Start page's btn_start_g, btn_copy_g, btn_delete_g and
+// btn_option_g, each with bb_* panes holding its touch rect on screen as last drawn (left, top,
+// right, bottom floats at +0x2C), what the game hit-tests; cursor_g holds
+// their glows, cursor_start_g, cursor_copy_del_g (Copy's and Erase's) and cursor_option_g.
 typedef struct FileSelectList {
     /* 0x000 */ char unk_000[0x6E4];
     /* 0x6E4 */ struct UiWidget* returnButton; // btn_return_l, at (0, 202)
@@ -607,14 +611,33 @@ typedef struct TitleScreen {
 
 // File select's screen: FileSelectScreen_Draw queues each layout it holds.
 typedef struct FileSelectScreen {
-    /* 0x00 */ char unk_00[0x1C];
+    /* 0x000 */ char unk_00[0x1C];
     /* 0x1C */ FileSelectList* files; // the touch screen's list, the file's Start, Copy and Erase, Return; queue 5
     /* 0x20 */ struct UiLayout* touchBackground; // queue 4
     /* 0x24 */ struct UiLayout* details; // the top screen's plate of the file under the cursor; queue 2
     /* 0x28 */ struct UiLayout* topBackground; // queue 0
     /* 0x2C */ struct UiLayout* titleBar; // "Select File" and the clock; queue 2
     /* 0x30 */ UiDialogLayout* dialogs; // the touch screen's prompts ("Saving...", yes and no); queue 5
-} FileSelectScreen; // size = 0x34 (at least)
+    /* 0x34 */ char unk_34[0x588];
+    /* 0x5BC */ uint8_t page; // FILE_SELECT_PAGE_*, set once the slide to it ends
+    /* 0x5BD */ uint8_t nextPage; // the page being slid to, or page
+    /* 0x5BE */ char unk_5BE[0xA];
+    /* 0x5C8 */ int32_t startChoice; // FILE_START_CHOICE_*: the Start page's button under the cursor
+} FileSelectScreen; // size = 0x5CC (at least)
+#define FILE_SELECT_PAGE_FILES 0
+#define FILE_SELECT_PAGE_START 1 // the file's Start, Copy, Erase and Options
+#define FILE_SELECT_PAGE_COPY 2
+#define FILE_START_CHOICE_START 0
+#define FILE_START_CHOICE_COPY 1
+#define FILE_START_CHOICE_OPTIONS 2
+#define FILE_START_CHOICE_ERASE 3
+// How far the cursor animation moves cursor_copy_del_g from Copy to Erase: their distance.
+#define FILE_START_ERASE_CURSOR_SHIFT 104
+// FileSelectScreen's vtable: its build (FileSelectScreen_Init) and its update.
+#define FILE_SELECT_SCREEN_VTABLE 0x0063A550
+#define FILE_SELECT_SCREEN_INIT_SLOT 7
+// FileSelectScreen_Update's call of FileSelectScreen_UpdateStart, from its start.
+#define FILE_SELECT_UPDATE_START_CALL 0x580
 // Their draws' calls of LayoutDrawManager_Draw, from each function's start: the title's PRESS START
 // (a tail call), file select's details, title bar, files and dialogs (a tail call).
 #define TITLE_SCREEN_DRAW_PRESS_START_CALL 0x30
@@ -821,7 +844,9 @@ typedef struct UiWidget {
     /* 0x080 */ float alpha;
     /* 0x084 */ uint32_t flags; // UI_WIDGET_*
     /* 0x088 */ uint32_t activeFlags;
-    /* 0x08C */ char unk_08C[0xB0];
+    /* 0x08C */ char unk_08C[0x54];
+    /* 0x0E0 */ float world[3][4]; // the widget's screen transform as last drawn; x moves at [0][3]
+    /* 0x110 */ char unk_110[0x2C];
 } UiWidget; // size = 0x13C
 
 typedef struct UiLayout {
@@ -984,6 +1009,14 @@ extern FileSelectScreen gFileSelectUiScreen; // 0x006F79D4
 // there too (docs/ui.md "Clipping a layout").
 extern uint32_t* gPicaCommandNext; // 0x006A3A88
 extern uint32_t* gPicaCommandEnd; // 0x006A3A8C
+// The game's stylus read (Input_ReadTouch): it calls nn::hid::TouchPanelReader::ReadLatest at
+// INPUT_READ_TOUCH_CALL into a TouchPanelStatus and keeps it in its input at +0x14.
+typedef struct TouchPanelStatus {
+    /* 0x0 */ uint16_t x; // the touch screen's pixel, 0 to 319
+    /* 0x2 */ uint16_t y;
+    /* 0x4 */ uint8_t touched;
+} TouchPanelStatus; // size = 0x8
+#define INPUT_READ_TOUCH_CALL 0x14
 // Pad buttons ORed into the next pad update's held word, then cleared (docs/ocarina.md).
 extern uint32_t gPadInjected; // 0x0072A0DC
 // The touch item buttons as the pad update leaves them: held, and pressed this frame.

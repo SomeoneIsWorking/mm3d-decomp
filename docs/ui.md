@@ -60,6 +60,30 @@ live, mmcmd). The game writes PICA registers itself as a value and a header at
 `gPicaCommandNext` (0x6A3A88, bounded by `gPicaCommandEnd`), as at 0x146F04 and in the GL state
 flush at 0x10BD30; a scissor written there around a queue's draw clips it (z3d-mods fs2, fs12).
 
+File select builds its layouts in `FileSelectScreen_Init` (0x5BA3BC, its vtable's eighth entry at
+0x63A56C), finding their widgets by name with `UiLayout_FindWidget` (0x13BE78: layout, name).
+`FileSelectScreen_Update` (0x5BB448) runs the page that is up; its call at +0x580 runs the Start
+page's, `FileSelectScreen_UpdateStart` (0x5B821C). `page` (+0x5BC) is the page shown, 0 the files,
+1 the file's Start page, 2 Copy's target list, 3 Erase's prompt; `nextPage` (+0x5BD) changes first
+and `page` follows when the slide ends, about 12 frames later (mmpage). On the Start page
+`startChoice` (+0x5C8) is the button under the cursor: 0 Start, 1 Copy, 2 Options, 3 Erase, set by
+the pad or a touch, and the cursor animation (the player at +0x5AC, its frame the choice plus one)
+lights the button's glow in `cursor_g`. Copy and Erase share one, `cursor_copy_del_g`, which the
+animation moves 104 to the right for Erase, the distance between the two buttons; its x does not
+follow its translate, its y and scale do (mmmove). Each button's group (`btn_start_g` and the rest)
+holds its touch rect on screen in its `bb_*` panes at +0x2C (left, top, right, bottom floats),
+updated as it is drawn: natively Start 46..274 by 66..110, Copy 66..150 and Erase 170..254 by
+118..156, Options 94..226 by 162..200, Return 0..58 by 202..240 in the list's 320 pixels. Moving a
+group by its translate and scale moved its touch area with it (z3d-mods fs14, a click on Options).
+The slide to the Start page moves the file rows (`plate_x_n`, `plate_y_n`, `plate_z_n` in
+`null_plate_g`) by animation from x 14 to -306, and `start_g`'s matrix from 360 to 40; a widget's
+matrix (+0xE0) is the one it was last drawn with, so a hidden group's is stale.
+
+The stylus is read by `Input_ReadTouch` (0x1161B4), whose call at +0x14 of
+`TouchPanelReader_ReadLatest` (0x122678) fills a `TouchPanelStatus` (x, y, touched) on the stack
+that it keeps in its input at +0x14; every touch the menus test comes from there (a touch's x,
+scaled there, chose Options drawn past the touch screen's width; z3d-mods fs14).
+
 `gUiScreenContext.nextScreen` (+0xC) is the screen to change to, null once the change is made.
 Leaving the Map screen writes Main there (0x5932BC); Start in play writes the notebook's
 (under Project Restoration, from its own code). The same write while the Map screen is up opens

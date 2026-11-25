@@ -83,9 +83,9 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### ui.outside_play — the title's and file select's layouts, the draw queues and the top screen's target
 - status: re-partial
 - deps: ui.screen
-- evidence: TitleScreen_Draw (0x5A81EC) and FileSelectScreen_Draw (0x5BA0DC) disassembled; each file select layout moved between queues live, 0 to 3 drawing on the top screen and 4 and 5 on the touch screen (mmmove); a root widget moved by translate and scale with its flags (mmroot) and touches hit-tested where it was drawn (fs7); the top screen's 480x400 target and its scissor read from the command list (mmcmd); a scissor written at gPicaCommandNext clipping queue 1 (fs12)
+- evidence: TitleScreen_Draw (0x5A81EC) and FileSelectScreen_Draw (0x5BA0DC) disassembled; each file select layout moved between queues live, 0 to 3 drawing on the top screen and 4 and 5 on the touch screen (mmmove); a root widget moved by translate and scale with its flags (mmroot) and touches hit-tested where it was drawn (fs7); the top screen's 480x400 target and its scissor read from the command list (mmcmd); a scissor written at gPicaCommandNext clipping queue 1 (fs12); FileSelectScreen_Init and the Start page's update and choice watched and decompiled, its buttons' touch rects read from their bb panes, the stylus read found by a memory scan and a watch (mmpage, mmtouch, fs14)
 - where: docs/ui.md, include/z3D.h, symbols/functions.csv
-- gap: why the minimap's queue-4 batches draw on the top screen; the widget fields between translate and alpha; the title bar's clock
+- gap: why the minimap's queue-4 batches draw on the top screen; the widget fields between translate and alpha; the title bar's clock; the animation format (where cursor_copy_del_g's 104 and the rows' slide are keyed); the Options screen's own layouts
 - notes: 
 
 ### ui.hud_visibility — how much of the HUD shows
