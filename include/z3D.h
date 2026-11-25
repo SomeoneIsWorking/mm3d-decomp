@@ -675,6 +675,7 @@ typedef struct OptionsScreen {
 #define OPTIONS_SCREEN_DRAW_TITLE_BAR_CALL 0x140
 #define OPTIONS_SCREEN_VTABLE 0x0063A11C
 #define OPTIONS_SCREEN_INIT_SLOT 7
+#define OPTIONS_SCREEN_UPDATE_SLOT 8 // OptionsScreen_Update
 // FileSelectScreen's vtable: its build (FileSelectScreen_Init) and its update.
 #define FILE_SELECT_SCREEN_VTABLE 0x0063A550
 #define FILE_SELECT_SCREEN_INIT_SLOT 7

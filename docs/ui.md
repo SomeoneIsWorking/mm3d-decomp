@@ -107,12 +107,17 @@ clears the whole of `gCommonData` for a new file, and the file's defaults that f
 `circlePadPro` and `volume` to 1, so a new file starts on Switch, Use and Normal throughout.
 
 File select keeps each file's data apart and copies the chosen one into `gCommonData` with
-`CommonData_Copy` (0x5A4874: to, from) when Options is picked on its Start page (0x5BB8D0), and
-marks the Options screen as entered from there (+0x1AC). `OptionsScreen_Init` reads the seven
+`CommonData_Copy` (0x5A4874: to, from) when Options is picked on its Start page (0x5BB8D0), after
+`FileSelectScreen_Update` writes the Options screen into `gUiScreenContext.nextScreen` and marks it
+as entered from there (+0x1AC). File select leaves its Start page as it writes it: with the write
+skipped, the buttons slid off and the page took no more input (z3d-mods hold3). `OptionsScreen_Init` reads the seven
 options into its working copies (+0x13C, `OPTIONS_SCREEN_VALUES`); a left or right on a plate
-steps its copy with the hint for the new choice; Return runs `OptionsScreen_Commit` (0x5A34D0),
-which writes them back into `gCommonData`, applies the volume through `Audio_SetVolumeSetting`
-(0x14ECCC: 0 to 2, clamped) and asks for the file to be written. Each choice's value was read
+steps its copy with the hint for the new choice. `OptionsScreen_Update` (0x5A3D60, the vtable's
+ninth entry) runs the screen by its state (+0x08); B or Return plays the way out and, once its
+animation ends, runs `OptionsScreen_Commit` (0x5A34D0: screen, context), which writes the copies
+back into `gCommonData`, applies the volume through `Audio_SetVolumeSetting` (0x14ECCC: 0 to 2,
+clamped), asks file select to write the file (its +0x5D1) and writes file select
+(`gUiScreens[12]`) into `nextScreen` while the context's bytes at +0x10 and +0x11 are both set. Each choice's value was read
 off the screen against the byte while stepping every plate through its choices (z3d-mods gopt1).
 
 The stylus is read by `Input_ReadTouch` (0x1161B4), whose call at +0x14 of

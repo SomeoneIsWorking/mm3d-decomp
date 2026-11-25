@@ -87,6 +87,7 @@ vaddr,name
 005a31bc,OptionsScreen_Draw
 005a34d0,OptionsScreen_Commit
 005a3614,OptionsScreen_Init
+005a3d60,OptionsScreen_Update
 005a4874,CommonData_Copy
 005a81ec,TitleScreen_Draw
 005b821c,FileSelectScreen_UpdateStart
