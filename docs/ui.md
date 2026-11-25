@@ -15,7 +15,13 @@ points at the one that is up.
 | 6 | Masks | live: a touch on Masks |
 | 7 | Ocarina: "Play your instrument" | live: a touch on the ocarina button |
 
-On the title screen `activeScreen` is 0x6F7FB4, which is not in the table. Project Restoration (GPL,
+Outside play `activeScreen` points at screens that are not in the table: `gTitleUiScreen`
+(0x6F7FB4, vtable 0x63A330) from the opening through PRESS START, and `gFileSelectUiScreen`
+(0x6F79D4, vtable 0x63A550) at file select, its list of files and Return on the touch screen under
+the top screen's "Select File" bar (z3d-mods run mmprobe). `gTitleUiScreen` is up through the whole
+opening, before PRESS START shows: the word at +0x1F0 steps 4, 9, 0, 2, 0xE, 7, 0 through it
+(z3d-mods run tstate) and is 0 both with PRESS START up and without it, so it is not the prompt's
+state. Project Restoration (GPL,
 evidence only) names the table's order Black, Main, Schedule, Gear, Items, Map, Masks, Ocarina, and
 the word after `activeScreen` the screen being changed to.
 

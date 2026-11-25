@@ -904,6 +904,10 @@ extern CommonData gCommonData; // 0x007751D8
 extern PlayState* gPlayState; // 0x00667890
 extern UiScreenContext gUiScreenContext; // 0x0072F5BC
 extern void* gUiScreens[UI_SCREEN_COUNT]; // 0x00656B00
+// The touch screens of the title (PRESS START) and of file select, outside gUiScreens: activeScreen
+// points at one of them outside play (docs/ui.md).
+extern uint8_t gTitleUiScreen[]; // 0x006F7FB4
+extern uint8_t gFileSelectUiScreen[]; // 0x006F79D4
 // Pad buttons ORed into the next pad update's held word, then cleared (docs/ocarina.md).
 extern uint32_t gPadInjected; // 0x0072A0DC
 // The touch item buttons as the pad update leaves them: held, and pressed this frame.
