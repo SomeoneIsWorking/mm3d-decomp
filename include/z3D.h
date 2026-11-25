@@ -709,15 +709,49 @@ typedef struct UiScreenContext {
 } UiScreenContext; // size = 0x10 (at least)
 
 // The Items and Masks screens (gUiScreens[UI_SCREEN_ITEMS] and [UI_SCREEN_MASKS], docs/items.md).
+// ItemScreen_DrawBase queues the parts both share, ItemScreen_Draw and MaskScreen_Draw the page and
+// its cells.
 typedef struct ItemScreen {
-    /* 0x00 */ char unk_00[0x18];
+    /* 0x00 */ void* vtable;
+    /* 0x04 */ struct UiLayout* touchBackground; // queue 4
+    /* 0x08 */ struct UiLayout* cursors[2]; // the frames on the cell under the cursor, queue 5
+    /* 0x10 */ char unk_10[0x8];
     /* 0x18 */ int8_t cursorColumn; // buttonColumn on the item buttons' column
     /* 0x19 */ int8_t cursorRow;
-    /* 0x1A */ char unk_1A[0x85];
+    /* 0x1A */ char unk_1A[0x2];
+    /* 0x1C */ uint8_t cursorsShown; // bit n draws cursors[n]
+    /* 0x1D */ char unk_1D[0x7];
+    /* 0x24 */ struct UiLayout* titleBar; // the top screen's title and clock, queue 3
+    /* 0x28 */ struct UiLayout* topDim; // over play on the top screen, queue 0
+    /* 0x2C */ struct UiLayout* buttonIcons[4]; // in the item buttons' column, queue 5
+    /* 0x3C */ char unk_3C[0x2C];
+    /* 0x68 */ struct UiLayout* unk_68; // queue 5
+    /* 0x6C */ char unk_6C[0x4];
+    /* 0x70 */ struct UiLayout* unk_70; // queue 5 while unk_9E is set
+    /* 0x74 */ char unk_74[0x2A];
+    /* 0x9E */ uint8_t unk_9E;
     /* 0x9F */ uint8_t state; // 2 while browsing
     /* 0xA0 */ char unk_A0[0x3];
     /* 0xA3 */ uint8_t buttonColumn; // 5 on Items, 6 on Masks
-} ItemScreen; // size = 0xA4 (at least)
+    /* 0xA4 */ char unk_A4[0x10];
+    /* 0xB4 */ struct UiLayout* held[2]; // cells or icons being moved, drawn over the rest
+    /* 0xBC */ char unk_BC[0x4];
+    /* 0xC0 */ struct UiLayout* page; // grid, tabs, item buttons' column and Return, queue 5
+    /* 0xC4 */ char unk_C4[0xC];
+    /* 0xD0 */ struct UiLayout* cells[]; // 20 on Items, 24 on Masks, queue 5
+} ItemScreen; // size = 0xD0 (at least)
+// The calls of LayoutDrawManager_Draw, from each function's start: ItemScreen_DrawCursor's of the
+// cursors, ItemScreen_DrawBase's of unk_68, unk_70, the column's icons and the held ones, and each
+// screen draw's of its page and its cells.
+#define ITEM_SCREEN_DRAW_CURSOR_CALL 0x48
+#define ITEM_SCREEN_DRAW_BASE_68_CALL 0x48
+#define ITEM_SCREEN_DRAW_BASE_70_CALL 0x68
+#define ITEM_SCREEN_DRAW_BASE_ICON_CALL 0x120
+#define ITEM_SCREEN_DRAW_BASE_HELD_CALL 0x15C
+#define ITEM_SCREEN_DRAW_PAGE_CALL 0x20
+#define ITEM_SCREEN_DRAW_CELL_CALL 0xD8
+#define MASK_SCREEN_DRAW_PAGE_CALL 0x1C
+#define MASK_SCREEN_DRAW_CELL_CALL 0xDC
 
 // The Ocarina screen (gUiScreens[UI_SCREEN_OCARINA], docs/ocarina.md).
 typedef struct OcarinaScreen {
@@ -771,6 +805,9 @@ typedef struct MessagePrinter {
 
 // The message window (gMessageObject): its printer.
 #define MESSAGE_WINDOW_PRINTER 0x368
+// MessageMgr_DrawWindow's call of LayoutDrawManager_Draw queueing the window, a layout whose root
+// is the box's middle (200, 195 in play), on queue 3.
+#define MESSAGE_MGR_DRAW_WINDOW_CALL 0x60
 
 // The message object's ocarina mode word, and its value in free play.
 #define MESSAGE_OCARINA_MODE 0x42C
@@ -1048,6 +1085,9 @@ extern void* gUiScreens[UI_SCREEN_COUNT]; // 0x00656B00
 extern TitleScreen gTitleUiScreen; // 0x006F7FB4
 extern FileSelectScreen gFileSelectUiScreen; // 0x006F79D4
 extern OptionsScreen gOptionsUiScreen; // 0x006F7348
+// gUiScreens[UI_SCREEN_ITEMS] and [UI_SCREEN_MASKS].
+extern ItemScreen gItemsUiScreen; // 0x006F42D8
+extern ItemScreen gMasksUiScreen; // 0x006F660C
 // Where the GPU driver writes its next PICA command (a value, then its header) and the end of the
 // list it writes into; the game's own register writes (0x146C00, the GL state flush at 0x10BB00) go
 // there too (docs/ui.md "Clipping a layout").

@@ -107,9 +107,9 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### items.screens — the Items and Masks screens' cursor and grids, the bottles' slots, and an item button pressed for the player
 - status: re-partial
 - deps: items.buttons, ui.screen
-- evidence: live: the Items screen's cursor column and row, the item grid's slots, a bottle in slot 48 drawn in its cell, the bow used from I and a bomb from II through gTouchButtonsHeld and gTouchButtonsPressed written at Play_Update's entry (z3d-mods runs ctl-mm1, ctl-mm6); the rest read from the disassembly (0x5C1328, 0x1DB1C4, 0x2190FC)
-- where: docs/items.md, include/z3D.h
-- gap: the Masks screen and its grid were not opened; Y and X were not pressed this way; ItemScreen is named at four fields; the mask-off and put-away checks of the item button routine are read, not run
+- evidence: live: the Items screen's cursor column and row, the item grid's slots, a bottle in slot 48 drawn in its cell, the bow used from I and a bomb from II through gTouchButtonsHeld and gTouchButtonsPressed written at Play_Update's entry (z3d-mods runs ctl-mm1, ctl-mm6); the rest read from the disassembly (0x5C1328, 0x1DB1C4, 0x2190FC); ItemScreen_Draw, MaskScreen_Draw, ItemScreen_DrawBase and ItemScreen_DrawCursor read from the disassembly, their layouts named by their widgets live, moved to a top queue and placed there, the Masks tab and Return hit where drawn (z3d-mods runs items5 to items21); the message window placed under the grid and back (items17)
+- where: docs/items.md, include/z3D.h, symbols/functions.csv
+- gap: Y and X were not pressed this way; unk_68 and unk_70 never seen drawn; the item's 3D model's placement; a held item's root while dragged not watched; the mask-off and put-away checks of the item button routine are read, not run
 - notes: 
 
 ### items.ocarina — the Ocarina screen, the note input and the song table

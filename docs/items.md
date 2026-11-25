@@ -52,6 +52,30 @@ cursor, `buttonColumn` (+0xA3, 5 on Items) the column of the item buttons, `stat
 while browsing. Live (ctl-mm1): the cursor reads 0,0 when the screen opens, 1,0 after a move
 right and 1,1 after a move down.
 
+### Their draws
+`ItemScreen_Draw` (0x59E3E4) and `MaskScreen_Draw` (0x59F5E0) first call `ItemScreen_DrawBase`
+(0x5C215C), which calls `ItemScreen_DrawCursor` (0x5A19D8: `touchBackground` on queue 4, then
+each of `cursors` whose bit is set in `cursorsShown` on queue 5), then queues `titleBar` on 3 and
+`topDim` on 0, `unk_68` and (while `unk_9E` is set) `unk_70` on 5, the four `buttonIcons` on 5
+unless held, and each `held` on 5 with order 7. The screen draw then queues `page` on 5 and its
+cells (`cells`, 20 on Items, 24 on Masks) on 5. The call offsets are `ITEM_SCREEN_DRAW_*_CALL` and
+`MASK_SCREEN_DRAW_*_CALL`.
+
+`page`'s widgets: `all` holds the frames `set_frame0_g` to `set_frame3_g`, the cells' places
+`item_set_pos_g`, the tabs `btn_item_omen_g` (`btn_omen_l` Masks and `btn_item_l` Items, each a
+widget with its own layout, and their touch areas `bb_item_omen_pane00` and `01`: Masks 61 to 157,
+Items 157 to 253, by 206 to 244), Return `btn_return_l` at (0, 202), the grid's panel
+`item_panel_g` and the item buttons' column `right_item_set_l` (255 to 320). A cell's and a
+cursor's root carries its place, the cell's middle (32, 28 for the first, 48 apart). Return's and
+the tabs' translates are animated and keep their values against writes; their scales and their
+own layouts' roots take them. The game hit-tests the tabs and Return where they are drawn:
+`page` queued on the top screen, placed at 0.75 with each tab and its touch area moved together,
+switched to Masks on a touch at the tab's new place and back to play on Return's (z3d-mods
+items18 to items21). The item's description is play's message box (`gMessageObject`, a layout
+whose root is the box's middle, 200 by 195), queued by `MessageMgr_DrawWindow` (0x17EBD8) on
+queue 3 at `MESSAGE_MGR_DRAW_WINDOW_CALL`; placed and scaled by its root while the screen is up, it
+drew there, and put back it drew a later message at its own place (items17).
+
 ## Pressing an item button for the player
 `Play_Update` (0x15F644) runs every frame of a play state, a touch screen up or not;
 `Actor_UpdateAll` does not run while the Items screen is up (a hook there saw no frame, ctl-mm5).
