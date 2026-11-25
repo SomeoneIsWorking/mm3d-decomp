@@ -3,11 +3,13 @@ vaddr,name
 0010677c,Graph_DrawFrame
 0010852c,GyroscopeReader_EnableZeroPlay
 00108538,GyroscopeReader_EnableZeroDrift
+00110a24,Graph_DrawTopScreen
 00114518,GyroscopeReader_Read
 00114644,GyroscopeReader_SetZeroDriftMode
 00114898,GyroscopeReader_Reset
 00121fb0,GyroscopeReader_ReadLocal
 00124ee8,Graph_FrameEnd
+00126810,LayoutDrawManager_DrawQueue
 0012e10c,GyroscopeReader_UpdateDirection
 0012e2d8,GyroscopeReader_CalculateAxis
 0012e494,GyroscopeReader_ReviseDirection
@@ -77,6 +79,8 @@ vaddr,name
 005475a8,Inventory_IsMapVisible
 0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
+005a81ec,TitleScreen_Draw
+005ba0dc,FileSelectScreen_Draw
 005ec198,AnimPlayer_Step
 005f9d04,PlayActionIcon_Update
 00607584,MessagePrinter_InstantOff

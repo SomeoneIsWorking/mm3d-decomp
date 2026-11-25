@@ -582,6 +582,59 @@ extern OsCriticalSection gGspInterruptLock; // 0x007C0F50
 #define UI_SCREEN_OCARINA 7
 #define UI_SCREEN_COUNT 8
 
+// A screen's prompts over the touch screen (vtable 0x63CA00): the window, its buttons, and the
+// black that dims the screen behind it (docs/ui.md "Title and file select").
+typedef struct UiDialogLayout {
+    /* 0x000 */ char unk_000[0x3B4];
+    /* 0x3B4 */ struct UiWidget* window; // window_g
+    /* 0x3B8 */ char unk_3B8[0x3C];
+    /* 0x3F4 */ struct UiWidget* blackScreen; // black_screen_g, the touch screen's 320x240 from its top left
+} UiDialogLayout; // size = 0x3F8 (at least)
+
+// File select's list on the touch screen (vtable 0x63C7F4).
+typedef struct FileSelectList {
+    /* 0x000 */ char unk_000[0x6E4];
+    /* 0x6E4 */ struct UiWidget* returnButton; // btn_return_l, at (0, 202)
+} FileSelectList; // size = 0x6E8 (at least)
+
+// The title's screen (docs/ui.md "Title and file select"): TitleScreen_Draw queues pressStart.
+typedef struct TitleScreen {
+    /* 0x00 */ char unk_00[0x8];
+    /* 0x08 */ struct UiLayout* pressStart; // PRESS START, queue 5
+    /* 0x0C */ char unk_0C[0x10];
+    /* 0x1C */ struct UiLayout* touchBackground; // queue 4
+} TitleScreen; // size = 0x20 (at least)
+
+// File select's screen: FileSelectScreen_Draw queues each layout it holds.
+typedef struct FileSelectScreen {
+    /* 0x00 */ char unk_00[0x1C];
+    /* 0x1C */ FileSelectList* files; // the touch screen's list, the file's Start, Copy and Erase, Return; queue 5
+    /* 0x20 */ struct UiLayout* touchBackground; // queue 4
+    /* 0x24 */ struct UiLayout* details; // the top screen's plate of the file under the cursor; queue 2
+    /* 0x28 */ struct UiLayout* topBackground; // queue 0
+    /* 0x2C */ struct UiLayout* titleBar; // "Select File" and the clock; queue 2
+    /* 0x30 */ UiDialogLayout* dialogs; // the touch screen's prompts ("Saving...", yes and no); queue 5
+} FileSelectScreen; // size = 0x34 (at least)
+// Their draws' calls of LayoutDrawManager_Draw, from each function's start: the title's PRESS START
+// (a tail call), file select's details, title bar, files and dialogs (a tail call).
+#define TITLE_SCREEN_DRAW_PRESS_START_CALL 0x30
+#define FILE_SELECT_DRAW_DETAILS_CALL 0x50
+#define FILE_SELECT_DRAW_TITLE_BAR_CALL 0x70
+#define FILE_SELECT_DRAW_FILES_CALL 0xF8
+#define FILE_SELECT_DRAW_DIALOGS_CALL 0x11C
+
+// PICA registers the game writes itself (gPicaCommandNext): a command is the value, then the
+// header, the register in its low 16 bits and the bytes to write above.
+#define PICA_COMMAND_ALL_BYTES 0x000F0000
+#define PICA_REG_SCISSOR_MODE 0x65 // 3 draws only inside
+#define PICA_REG_SCISSOR_FROM 0x66 // x | y << 16, the framebuffer's own axes
+#define PICA_REG_SCISSOR_TO 0x67
+#define PICA_SCISSOR_INSIDE 3
+// The target Graph_DrawTopScreen draws into: its framebuffer x runs up the top screen at two
+// rows a line, its y leftwards across it; the pass sets its scissor to the whole target.
+#define TOP_SCREEN_TARGET_WIDTH 480
+#define TOP_SCREEN_TARGET_HEIGHT 400
+
 typedef struct UiScreenContext {
     /* 0x00 */ void* vtable;
     /* 0x04 */ char unk_04[0x4];
@@ -744,6 +797,10 @@ extern SceneTableEntry gSceneTable[SCENE_TABLE_COUNT]; // 0x0069B340
 // A node of a layout's tree (docs/hud.md).
 #define UI_WIDGET_VISIBLE 0x1 // flags
 #define UI_WIDGET_VISIBLE_CHANGED 0x20000 // flags: set by a change; activeFlags: set while visible
+#define UI_WIDGET_TRANSLATE_X 0x100 // flags: translate.x was set; activeFlags: it is the default, 0
+#define UI_WIDGET_TRANSLATE_Y 0x200
+#define UI_WIDGET_SCALE_X 0x800 // flags: scale.x was set; activeFlags: it is the default, 1
+#define UI_WIDGET_SCALE_Y 0x1000
 #define UI_WIDGET_FLAGS_HIDDEN 0x0FFFFF0E
 #define UI_WIDGET_ACTIVE_FLAGS_HIDDEN 0x0FFDFF00
 
@@ -757,7 +814,10 @@ typedef struct UiWidget {
     /* 0x018 */ uint32_t childCount;
     /* 0x01C */ char unk_01C[0x4];
     /* 0x020 */ struct UiLayout* layout; // the layout a widget stands for, or NULL
-    /* 0x024 */ char unk_024[0x5C];
+    /* 0x024 */ char unk_024[0x18];
+    /* 0x03C */ Vec3f translate; // from the parent's origin, y down; a root's from the screen's top left
+    /* 0x048 */ Vec3f scale;
+    /* 0x054 */ char unk_054[0x2C];
     /* 0x080 */ float alpha;
     /* 0x084 */ uint32_t flags; // UI_WIDGET_*
     /* 0x088 */ uint32_t activeFlags;
@@ -818,6 +878,17 @@ typedef struct MainScreen {
 #define LAYOUT_DRAW_QUEUE_CAPACITY 0x180
 #define LAYOUT_DRAW_QUEUE_TOP 4 // the top screen's 2D, over the 3D
 #define LAYOUT_DRAW_QUEUE_TOUCH 6 // the touch screen's map
+// Graph_DrawTopScreen draws queues 0 to 3 on the top screen, 0 under the 3D and 1 to 3 over it;
+// Graph_DrawFrame draws 4 and 5, where the title's, file select's and MainScreen's layouts land on
+// the touch screen (docs/ui.md "Title and file select").
+#define LAYOUT_DRAW_QUEUE_TOP_BACK 0
+#define LAYOUT_DRAW_QUEUE_TOP_1 1
+#define LAYOUT_DRAW_QUEUE_TOP_2 2
+#define LAYOUT_DRAW_QUEUE_TOP_3 3
+#define LAYOUT_DRAW_QUEUE_TOUCH_BACK 4
+#define LAYOUT_DRAW_QUEUE_TOUCH_5 5
+// Graph_DrawTopScreen's draw of queue 1, from its start.
+#define GRAPH_DRAW_TOP_QUEUE_1_CALL 0x2CC
 
 typedef struct LayoutDrawManager {
     /* 0x0000 */ char unk_0000[0x14];
@@ -906,8 +977,13 @@ extern UiScreenContext gUiScreenContext; // 0x0072F5BC
 extern void* gUiScreens[UI_SCREEN_COUNT]; // 0x00656B00
 // The touch screens of the title (PRESS START) and of file select, outside gUiScreens: activeScreen
 // points at one of them outside play (docs/ui.md).
-extern uint8_t gTitleUiScreen[]; // 0x006F7FB4
-extern uint8_t gFileSelectUiScreen[]; // 0x006F79D4
+extern TitleScreen gTitleUiScreen; // 0x006F7FB4
+extern FileSelectScreen gFileSelectUiScreen; // 0x006F79D4
+// Where the GPU driver writes its next PICA command (a value, then its header) and the end of the
+// list it writes into; the game's own register writes (0x146C00, the GL state flush at 0x10BB00) go
+// there too (docs/ui.md "Clipping a layout").
+extern uint32_t* gPicaCommandNext; // 0x006A3A88
+extern uint32_t* gPicaCommandEnd; // 0x006A3A8C
 // Pad buttons ORed into the next pad update's held word, then cleared (docs/ocarina.md).
 extern uint32_t gPadInjected; // 0x0072A0DC
 // The touch item buttons as the pad update leaves them: held, and pressed this frame.

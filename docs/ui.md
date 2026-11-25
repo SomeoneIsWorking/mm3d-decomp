@@ -25,6 +25,41 @@ state. Project Restoration (GPL,
 evidence only) names the table's order Black, Main, Schedule, Gear, Items, Map, Masks, Ocarina, and
 the word after `activeScreen` the screen being changed to.
 
+## Title and file select
+
+Each screen's draw (its vtable's tenth entry) queues its layouts with `LayoutDrawManager_Draw`
+(0x17EC58: manager, layout, queue, order). `TitleScreen_Draw` (0x5A81EC) queues its touch
+backdrop (+0x1C) on queue 4 and PRESS START (+0x08) on 5, the latter a tail call.
+`FileSelectScreen_Draw` (0x5BA0DC) queues the top screen's background (+0x28) on 0, the plate of
+the file under the cursor (+0x24) and the title bar, "Select File" with the clock (+0x2C), on 2, the
+touch backdrop (+0x20) on 4, and on 5 the list (+0x1C: the files, a file's Start, Copy, Erase and
+Options, Return) and the prompts (+0x30: "Saving...", the yes and no windows). The list layout
+(vtable 0x63C7F4) holds its groups by pointer, Return at +0x6E4; the prompts' (vtable 0x63CA00) its
+window at +0x3B4 and the black that dims the touch screen behind it at +0x3F4.
+
+Which screen a queue draws on: `Graph_DrawTopScreen` (0x110A24) draws queues 0 to 3 into the top
+screen's target through `LayoutDrawManager_DrawQueue` (0x126810: manager, queue, context), 0 before
+the 3D and 1 to 3 after it; `Graph_DrawFrame` draws 4 (0x106CF4) and 5 (0x106E4C). A file select
+layout moved to queue 0, 1, 2 or 3 drew on the top screen and to 4 or 5 on the touch screen; 6 and 7
+drew nothing there (z3d-mods runs mmmove, the queue argument rewritten live). This does not fit
+docs/hud.md's minimap, whose batches show on the top screen from queue 4.
+
+A widget's place is its `translate` (+0x3C, from its parent's origin, y down; a root's from the
+screen's top left) and `scale` (+0x48), the head of the 0x50-byte block Project Restoration (GPL,
+evidence only) calls the widget's position, which ends with `flags` and `activeFlags`. The game
+lays a widget out again only when a field's bit is set in `flags` (`UI_WIDGET_TRANSLATE_X` and the
+rest), `activeFlags` holding the same bit while the field is at its default: written alone, a
+translate moved nothing; with the bits, the list moved (mmroot). Touches are hit-tested through the
+same matrices: with the list moved 40 to the right, a touch at (250, 100) chose the file drawn there
+(fs7).
+
+The top screen's target is 480x400, twice the screen's 240 lines: its framebuffer register
+(0x11E) reads 0x118F200, and `Graph_DrawTopScreen` sets the viewport to 480 by 400 and the scissor
+to (0, 0) to (479, 399), mode 3; the touch screen's pass sets 240 by 320 (the command list read
+live, mmcmd). The game writes PICA registers itself as a value and a header at
+`gPicaCommandNext` (0x6A3A88, bounded by `gPicaCommandEnd`), as at 0x146F04 and in the GL state
+flush at 0x10BD30; a scissor written there around a queue's draw clips it (z3d-mods fs2, fs12).
+
 `gUiScreenContext.nextScreen` (+0xC) is the screen to change to, null once the change is made.
 Leaving the Map screen writes Main there (0x5932BC); Start in play writes the notebook's
 (under Project Restoration, from its own code). The same write while the Map screen is up opens

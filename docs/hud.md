@@ -124,7 +124,8 @@ above); red for 2 is the remaining cell and was not run. Henriko's pack replaces
 state's +0x13D is 4, and it calls `Minimap_Draw` (0x36DEBC). That fills the quad batches
 `gMinimapQuads[0]`, `[1]` (the room's layers) and `gMinimapMarkerQuads` (the player's arrow and
 the markers) with screen-space quads and queues them on `gLayoutDrawManager`'s
-`LAYOUT_DRAW_QUEUE_TOUCH`; the frame draws each queue in ascending priority. A batch moved to
+`LAYOUT_DRAW_QUEUE_TOUCH`; the frame draws each queue in ascending priority (which queue draws on
+which screen: docs/ui.md "Title and file select", where layouts in queue 4 draw on the touch screen). A batch moved to
 `LAYOUT_DRAW_QUEUE_TOP` after the call, its positions and sizes rescaled, draws on the top screen
 A quad's extent is its four `corners` times `sizes[i]`, turned by the first three floats of each
 row of `rotations[i]`, plus `positions[i]` (z3d-mods `patch/mm3d/minimap.cpp` fits the rooms' extent to a box; live: South Clock Town, Termina Field and Woodfall Temple, mmmap3, mmmap7).
