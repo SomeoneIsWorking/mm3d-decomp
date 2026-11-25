@@ -82,6 +82,8 @@ vaddr,name
 005475a8,Inventory_IsMapVisible
 0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
+005a31bc,OptionsScreen_Draw
+005a3614,OptionsScreen_Init
 005a81ec,TitleScreen_Draw
 005b821c,FileSelectScreen_UpdateStart
 005ba0dc,FileSelectScreen_Draw

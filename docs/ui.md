@@ -79,6 +79,23 @@ The slide to the Start page moves the file rows (`plate_x_n`, `plate_y_n`, `plat
 `null_plate_g`) by animation from x 14 to -306, and `start_g`'s matrix from 360 to 40; a widget's
 matrix (+0xE0) is the one it was last drawn with, so a hidden group's is stale.
 
+File select's Options screen is `gOptionsUiScreen` (0x6F7348, vtable 0x63A11C), built by
+`OptionsScreen_Init` (0x5A3614, the vtable's eighth entry). `OptionsScreen_Draw` (0x5A31BC) queues
+the top screen's background (+0x1C) on 0, the title bar, "Options" with the clock (+0x20), on 2
+(its call at +0x140), the touch backdrop (+0x14) on 4, and on 5 the list (+0x10, its call at +0xA8:
+the option plates on two pages of four, their Page 1 and Page 2 tabs, Return) and the cursor
+(+0x18, its call at +0x100: the frame on the plate chosen). The hint for the plate chosen is
+written into play's message box on the top screen. `choice` (+0x0A) is the plate chosen, 0 to 7
+across both pages, and the cursor's root is put at `cursorPlaces[choice]` (+0x14C, a Vec3f each,
+the plates' places filled by the build) by the function at 0x5A1E2C, so moving the places moves
+the cursor with the plates. The list's widgets: the pages `page1_g` and `page2_g` and the tabs
+`btn_page1_g` and `btn_page2_g` under `all`, beside `null_g`; Return is `btn_return_l`, a widget
+with its own layout (+0x20) whose root carries it. The page change slides the pages by 320 and
+swaps the tab rows between y 0 and 40 by animation, so those fields ignore writes; scaling `all`
+and each of its children back by the inverse stretches the slide and keeps the parts' size
+(z3d-mods opt5, opt6). Page 1 holds L-Targeting, Circle Pad Pro, Free Camera and Calibrate Circle
+Pad Pro; page 2 First-Person Camera, Motion Controls, Swimming Controls and Adjust Volume.
+
 The stylus is read by `Input_ReadTouch` (0x1161B4), whose call at +0x14 of
 `TouchPanelReader_ReadLatest` (0x122678) fills a `TouchPanelStatus` (x, y, touched) on the stack
 that it keeps in its input at +0x14; every touch the menus test comes from there (a touch's x,

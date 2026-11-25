@@ -633,6 +633,27 @@ typedef struct FileSelectScreen {
 #define FILE_START_CHOICE_ERASE 3
 // How far the cursor animation moves cursor_copy_del_g from Copy to Erase: their distance.
 #define FILE_START_ERASE_CURSOR_SHIFT 104
+// File select's Options screen: OptionsScreen_Draw queues each layout it holds; the function at
+// 0x5A1E2C puts the cursor's root at its place for the plate chosen.
+#define OPTIONS_CURSOR_PLACES 8
+typedef struct OptionsScreen {
+    /* 0x000 */ char unk_00[0xA];
+    /* 0x00A */ uint8_t choice; // the plate chosen, an index of cursorPlaces
+    /* 0x00B */ char unk_0B[0x5];
+    /* 0x10 */ struct UiLayout* list; // the touch screen's option plates on two pages, their tabs, Return; queue 5
+    /* 0x14 */ struct UiLayout* touchBackground; // queue 4
+    /* 0x18 */ struct UiLayout* cursor; // the frame on the plate chosen, its root moved there; queue 5
+    /* 0x1C */ struct UiLayout* topBackground; // queue 0
+    /* 0x20 */ struct UiLayout* titleBar; // "Options" with the clock; queue 2
+    /* 0x24 */ char unk_24[0x128];
+    /* 0x14C */ Vec3f cursorPlaces[OPTIONS_CURSOR_PLACES]; // the cursor's root on each plate, both pages
+} OptionsScreen; // size = 0x1AC (at least)
+// OptionsScreen_Draw's calls of LayoutDrawManager_Draw for the list and the cursor.
+#define OPTIONS_SCREEN_DRAW_LIST_CALL 0xA8
+#define OPTIONS_SCREEN_DRAW_CURSOR_CALL 0x100
+#define OPTIONS_SCREEN_DRAW_TITLE_BAR_CALL 0x140
+#define OPTIONS_SCREEN_VTABLE 0x0063A11C
+#define OPTIONS_SCREEN_INIT_SLOT 7
 // FileSelectScreen's vtable: its build (FileSelectScreen_Init) and its update.
 #define FILE_SELECT_SCREEN_VTABLE 0x0063A550
 #define FILE_SELECT_SCREEN_INIT_SLOT 7
@@ -1004,6 +1025,7 @@ extern void* gUiScreens[UI_SCREEN_COUNT]; // 0x00656B00
 // points at one of them outside play (docs/ui.md).
 extern TitleScreen gTitleUiScreen; // 0x006F7FB4
 extern FileSelectScreen gFileSelectUiScreen; // 0x006F79D4
+extern OptionsScreen gOptionsUiScreen; // 0x006F7348
 // Where the GPU driver writes its next PICA command (a value, then its header) and the end of the
 // list it writes into; the game's own register writes (0x146C00, the GL state flush at 0x10BB00) go
 // there too (docs/ui.md "Clipping a layout").
