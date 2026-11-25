@@ -96,6 +96,25 @@ and each of its children back by the inverse stretches the slide and keeps the p
 (z3d-mods opt5, opt6). Page 1 holds L-Targeting, Circle Pad Pro, Free Camera and Calibrate Circle
 Pad Pro; page 2 First-Person Camera, Motion Controls, Swimming Controls and Adjust Volume.
 
+### Options
+
+The options live in `gCommonData`, so in the loaded file and its save: `targetHold` (+0x351F),
+`motionOff` (+0x3520), `circlePadPro` (+0x3521), `firstPersonInvert` (+0x3524), `swimInvert`
+(+0x352C), `freeCameraInvert` (+0x352D) and `volume` (+0x352E). The camera options step Normal,
+Invert Y-Axis, Invert X-Axis, Invert Both (`CAMERA_INVERT_*`), the volume Lower, Normal, Higher;
+Circle Pad Pro at Don't Use greys out Free Camera and Calibrate. `CommonData_Init` (0x15CAA4)
+clears the whole of `gCommonData` for a new file, and the file's defaults that follow set
+`circlePadPro` and `volume` to 1, so a new file starts on Switch, Use and Normal throughout.
+
+File select keeps each file's data apart and copies the chosen one into `gCommonData` with
+`CommonData_Copy` (0x5A4874: to, from) when Options is picked on its Start page (0x5BB8D0), and
+marks the Options screen as entered from there (+0x1AC). `OptionsScreen_Init` reads the seven
+options into its working copies (+0x13C, `OPTIONS_SCREEN_VALUES`); a left or right on a plate
+steps its copy with the hint for the new choice; Return runs `OptionsScreen_Commit` (0x5A34D0),
+which writes them back into `gCommonData`, applies the volume through `Audio_SetVolumeSetting`
+(0x14ECCC: 0 to 2, clamped) and asks for the file to be written. Each choice's value was read
+off the screen against the byte while stepping every plate through its choices (z3d-mods gopt1).
+
 The stylus is read by `Input_ReadTouch` (0x1161B4), whose call at +0x14 of
 `TouchPanelReader_ReadLatest` (0x122678) fills a `TouchPanelStatus` (x, y, touched) on the stack
 that it keeps in its input at +0x14; every touch the menus test comes from there (a touch's x,

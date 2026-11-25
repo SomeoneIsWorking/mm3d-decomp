@@ -122,6 +122,15 @@ typedef struct RespawnData {
 
 #define RESPAWN_COUNT 8
 
+// The camera options' choices, in the order the Options screen steps through them.
+#define CAMERA_INVERT_NONE 0
+#define CAMERA_INVERT_Y 1
+#define CAMERA_INVERT_X 2
+#define CAMERA_INVERT_BOTH 3
+#define VOLUME_LOWER 0
+#define VOLUME_NORMAL 1
+#define VOLUME_HIGHER 2
+
 typedef struct CommonData {
     /* 0x00000 */ char unk_00000[0x8]; // start and scene
     /* 0x00008 */ SaveData save;
@@ -129,9 +138,16 @@ typedef struct CommonData {
     /* 0x03518 */ uint32_t entrance; // the scene's entrance in play; on load, where the file starts
     /* 0x0351C */ uint16_t statueEntrance; // where a statue save loads (docs/save.md)
     /* 0x0351E */ uint8_t statueSave; // the file was saved at a statue: its load resumes the cycle
-    /* 0x0351F */ char unk_0351F[0x1];
+    /* 0x0351F */ uint8_t targetHold; // the L-Targeting option: 1 Hold, 0 Switch (docs/ui.md "Options")
     /* 0x03520 */ uint8_t motionOff; // the Motion Controls option: 0 is on (docs/motion.md)
-    /* 0x03521 */ char unk_03521[0x100FB];
+    /* 0x03521 */ uint8_t circlePadPro; // the Circle Pad Pro option: 1 Use; 0 also turns the free camera off
+    /* 0x03522 */ char unk_03522[0x2];
+    /* 0x03524 */ uint8_t firstPersonInvert; // the First-Person Camera option: CAMERA_INVERT_*
+    /* 0x03525 */ char unk_03525[0x7];
+    /* 0x0352C */ uint8_t swimInvert; // the Swimming Controls option: 1 inverts up and down
+    /* 0x0352D */ uint8_t freeCameraInvert; // the Free Camera option: CAMERA_INVERT_*
+    /* 0x0352E */ uint8_t volume; // the Adjust Volume option: VOLUME_*, applied by Audio_SetVolumeSetting
+    /* 0x0352F */ char unk_0352F[0x100ED];
     /* 0x1361C */ int32_t setup; // 1 on the title screen, 0 in play
     /* 0x13620 */ char unk_13620[0x4];
     /* 0x13624 */ int32_t respawnFlag; // n > 0: the next scene load starts from respawn[n - 1], then it is 0
@@ -648,6 +664,11 @@ typedef struct OptionsScreen {
     /* 0x24 */ char unk_24[0x128];
     /* 0x14C */ Vec3f cursorPlaces[OPTIONS_CURSOR_PLACES]; // the cursor's root on each plate, both pages
 } OptionsScreen; // size = 0x1AC (at least)
+// The options' working copies, by plate: L-Targeting, First-Person Camera, Motion Controls,
+// Swimming Controls, Adjust Volume, Circle Pad Pro, Free Camera; OptionsScreen_Init reads them from
+// gCommonData and OptionsScreen_Commit writes them back.
+#define OPTIONS_SCREEN_VALUES 0x13C
+#define OPTIONS_SCREEN_VALUE_COUNT 7
 // OptionsScreen_Draw's calls of LayoutDrawManager_Draw for the list and the cursor.
 #define OPTIONS_SCREEN_DRAW_LIST_CALL 0xA8
 #define OPTIONS_SCREEN_DRAW_CURSOR_CALL 0x100

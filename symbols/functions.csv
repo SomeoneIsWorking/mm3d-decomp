@@ -18,8 +18,10 @@ vaddr,name
 00133930,GzfFont_Init
 0013be78,UiLayout_FindWidget
 00140b38,Graph_RunBoundCmdlist
+0014eccc,Audio_SetVolumeSetting
 0014f698,Play_Main
 0015bc00,nngxRunCmdlist
+0015caa4,CommonData_Init
 0015eb34,Play_Draw
 0015f644,Play_Update
 0016ebac,func_0016EBAC
@@ -83,7 +85,9 @@ vaddr,name
 0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
 005a31bc,OptionsScreen_Draw
+005a34d0,OptionsScreen_Commit
 005a3614,OptionsScreen_Init
+005a4874,CommonData_Copy
 005a81ec,TitleScreen_Draw
 005b821c,FileSelectScreen_UpdateStart
 005ba0dc,FileSelectScreen_Draw
