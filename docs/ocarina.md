@@ -10,6 +10,17 @@ your instrument" and 0 on the song list; `songCursor` (+0x44) is the list's entr
 row (live, run ctl-mm4: 5 after a move down, 6 after a move right, the Goron Lullaby). A touch on
 the staff button (290, 215) opens the list; B closes the ocarina from either page.
 
+
+`OcarinaScreen_Draw` (0x5A74CC, `gOcarinaUiScreen`) queues `touchBackground` on 4, then on 5
+`playLayout` on "Play your instrument" (the prompt bar 12 to 308 by 4 to 44, the notes' buttons,
+the list's button `btn_music_g` at 262 to 320 by 202 to 240, Cancel `btn_quit_g` at 0 to 58 by 202
+to 240) or `listLayout` (the staff 12 to 308 by 4 to 90, the songs' cells from (22, 107), 62 apart
+and 46 down, the instrument's button and Cancel) and then, while the list's animations are done,
+`cursor`, whose root the game moves to the song's cell by its translate alone. Cancel's group sits
+at the page's origin with its art and touch areas at their own touch pixels. Queued on the top
+screen at 0.55 from (4, 4) with Cancel's group at full size, the list's button, a song's cell and
+Cancel were hit-tested where drawn (z3d-mods oc4 to oc6).
+
 The list's fourteen entries are Time, Healing, Epona's, Soaring, Storms; the Sonata, the Goron
 Lullaby, its intro, the New Wave, the Elegy; the Oath, the Inverted Song of Time, the Song of
 Double Time and the scarecrow's. `gOcarinaListSongs` (0x620D64) holds each entry's row of the

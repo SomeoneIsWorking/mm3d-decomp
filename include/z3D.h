@@ -786,12 +786,24 @@ typedef struct MapScreen {
 #define MAP_SCREEN_DRAW_PAGE_CALL 0x74
 #define MAP_SCREEN_DRAW_INFO_CALL 0xE8
 
-// The Ocarina screen (gUiScreens[UI_SCREEN_OCARINA], docs/ocarina.md).
+// The Ocarina screen (gUiScreens[UI_SCREEN_OCARINA], docs/ocarina.md). OcarinaScreen_Draw queues
+// touchBackground on 4, then on 5 playLayout on "Play your instrument" (a tail call), or listLayout
+// and, while its animations are done, cursor (a tail call).
 typedef struct OcarinaScreen {
-    /* 0x00 */ char unk_00[0x40];
+    /* 0x00 */ char unk_00[0xC];
+    /* 0x0C */ struct UiLayout* touchBackground;
+    /* 0x10 */ struct UiLayout* playLayout; // the prompt, the notes' buttons, the list's button, Cancel
+    /* 0x14 */ struct UiLayout* listLayout; // the staff, the songs, the instrument's button, Cancel
+    /* 0x18 */ struct UiLayout* cursor; // on the song under it, its root carries its place
+    /* 0x1C */ char unk_1C[0x24];
     /* 0x40 */ int32_t playPage; // 1 on "Play your instrument", 0 on the song list
     /* 0x44 */ int32_t songCursor; // the song list's entry, five to a row
 } OcarinaScreen; // size = 0x48 (at least)
+// OcarinaScreen_Draw's calls of LayoutDrawManager_Draw for playLayout, listLayout and cursor, from
+// its start; the first and last are tail calls.
+#define OCARINA_SCREEN_DRAW_PLAY_CALL 0x54
+#define OCARINA_SCREEN_DRAW_LIST_CALL 0x74
+#define OCARINA_SCREEN_DRAW_CURSOR_CALL 0xC0
 
 // gOcarinaListSongs: an entry's value less this is its row of gOcarinaSongButtons.
 #define OCARINA_LIST_SONG_BASE 0x12
@@ -1125,6 +1137,8 @@ extern ItemScreen gMasksUiScreen; // 0x006F660C
 extern GearScreen gGearUiScreen; // 0x006F4130
 // gUiScreens[UI_SCREEN_MAP].
 extern MapScreen gMapUiScreen; // 0x006F45B8
+// gUiScreens[UI_SCREEN_OCARINA].
+extern OcarinaScreen gOcarinaUiScreen; // 0x006F72F4
 // Where the GPU driver writes its next PICA command (a value, then its header) and the end of the
 // list it writes into; the game's own register writes (0x146C00, the GL state flush at 0x10BB00) go
 // there too (docs/ui.md "Clipping a layout").

@@ -115,7 +115,7 @@ Statuses: ✅ re-verified · 🟡 re-partial (honest gap) · 🔬 in-progress ·
 ### items.ocarina — the Ocarina screen, the note input and the song table
 - status: re-partial
 - deps: items.screens
-- evidence: live: the screen's page and song cursor, the list's song bytes and the song table dumped, the message object's ocarina mode in free play, the ocarina brought out by TOUCH_BUTTON_OCARINA and the Song of Time recognised from notes written to gPadInjected (z3d-mods runs ctl-mm3, ctl-mm4, ctl-mm7, ctl-mm8, ctl-mm9)
+- evidence: live: the screen's page and song cursor, the list's song bytes and the song table dumped, the message object's ocarina mode in free play, the ocarina brought out by TOUCH_BUTTON_OCARINA and the Song of Time recognised from notes written to gPadInjected (z3d-mods runs ctl-mm3, ctl-mm4, ctl-mm7, ctl-mm8, ctl-mm9); OcarinaScreen_Draw (0x5A74CC) disassembled, its pages' widgets read and both pages queued on the top screen with the list's button, a song and Cancel hit-tested where drawn (oc4 to oc6)
 - where: docs/ocarina.md, include/z3D.h
 - gap: the pad update and the song matcher are read, not decompiled; only the Song of Time was played; its question before the return to the first day was not seen in the file used
 - notes: 
