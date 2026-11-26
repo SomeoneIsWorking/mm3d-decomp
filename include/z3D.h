@@ -753,6 +753,24 @@ typedef struct ItemScreen {
 #define MASK_SCREEN_DRAW_PAGE_CALL 0x1C
 #define MASK_SCREEN_DRAW_CELL_CALL 0xDC
 
+// The Gear screen (gUiScreens[UI_SCREEN_GEAR], docs/ui.md "Gear"). GearScreen_Draw queues
+// titleBar and picture on 2, touchBackground on 4, page on 5 and, while cursorShown, cursor on 5.
+typedef struct GearScreen {
+    /* 0x000 */ void* vtable;
+    /* 0x004 */ char unk_004[0x8];
+    /* 0x00C */ struct UiLayout* titleBar; // "Gear" and the clock
+    /* 0x010 */ struct UiLayout* picture; // the top screen's pictograph
+    /* 0x014 */ struct UiLayout* page; // the gear, the event items, Options and Return
+    /* 0x018 */ struct UiLayout* touchBackground;
+    /* 0x01C */ char unk_01C[0x114];
+    /* 0x130 */ struct UiLayout* cursor; // its root carries its place
+    /* 0x134 */ char unk_134[0x62];
+    /* 0x196 */ uint8_t cursorShown;
+} GearScreen; // size = 0x197 (at least)
+// GearScreen_Draw's calls of LayoutDrawManager_Draw for page and cursor, from its start.
+#define GEAR_SCREEN_DRAW_PAGE_CALL 0xB4
+#define GEAR_SCREEN_DRAW_CURSOR_CALL 0xD4
+
 // The Ocarina screen (gUiScreens[UI_SCREEN_OCARINA], docs/ocarina.md).
 typedef struct OcarinaScreen {
     /* 0x00 */ char unk_00[0x40];
@@ -1088,6 +1106,8 @@ extern OptionsScreen gOptionsUiScreen; // 0x006F7348
 // gUiScreens[UI_SCREEN_ITEMS] and [UI_SCREEN_MASKS].
 extern ItemScreen gItemsUiScreen; // 0x006F42D8
 extern ItemScreen gMasksUiScreen; // 0x006F660C
+// gUiScreens[UI_SCREEN_GEAR].
+extern GearScreen gGearUiScreen; // 0x006F4130
 // Where the GPU driver writes its next PICA command (a value, then its header) and the end of the
 // list it writes into; the game's own register writes (0x146C00, the GL state flush at 0x10BB00) go
 // there too (docs/ui.md "Clipping a layout").

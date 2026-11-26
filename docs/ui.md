@@ -138,6 +138,20 @@ Live values (USA 1.0 layout under Project Restoration): the table reads 0x656AFC
 0x6F6B3C, 0x6F4130, 0x6F42D8, 0x6F45B8, 0x6F660C, 0x6F72F4; `activeScreen` is 0x6F694C in play and
 0x6F42D8 with the Items screen open.
 
+## Gear
+
+`GearScreen_Draw` (0x5A5EDC, `gGearUiScreen` 0x6F4130) queues `titleBar` ("Gear" and the clock) and
+`picture` (the top screen's pictograph, its two panes hidden without one) on queue 2,
+`touchBackground` on 4, `page` on 5 and, while `cursorShown`, `cursor` on 5. `page` holds the
+gear and its panel `left_base_g` (4 to 258 by 0 to 200: the Pictograph Box, the remains, the
+sword, the shield, the instruments, the wallet, quiver and bomb bag), the four event items
+`right_base_g` (262 to 318), the arrow `btn_return_top_l` with its touch area (0 to 40 by 100 to
+140), Options `btn_option_l` with its touch area `bb_btn_option` (94 to 226 by 202 to 240) and
+Return `btn_return_l` at (0, 202). The icons are the page's own widgets, so they move with it;
+`cursor`'s root carries its place in touch pixels (33, 29 on the Pictograph Box). Queued on the top
+screen at 0.86 with Return and Options kept at full size, the game hit-tested Options where it was
+drawn (the Options screen opened) and Return (back to play) (z3d-mods gear4 to gear6).
+
 ## Map screen
 
 `MenuMapState.cpp` (0x594000 to 0x598000): 0x5975AC opens the screen, 0x594400 reads its input.

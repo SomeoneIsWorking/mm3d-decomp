@@ -93,6 +93,7 @@ vaddr,name
 005a3614,OptionsScreen_Init
 005a3d60,OptionsScreen_Update
 005a4874,CommonData_Copy
+005a5edc,GearScreen_Draw
 005a81ec,TitleScreen_Draw
 005b821c,FileSelectScreen_UpdateStart
 005ba0dc,FileSelectScreen_Draw
