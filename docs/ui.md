@@ -163,6 +163,19 @@ screen into the player's region ("Zoom In", then "Zoom Out"), A switches the tou
 between the loupe and its panning arrows, B leaves (z3d-mods runs `gap-zm2`, `gap-zm3`). Without the
 region's map there is no loupe and X does nothing (`gap-zm1`).
 
+`MapScreen_Draw` (0x596C20, `gMapUiScreen` 0x6F45B8) queues the touch backdrops (+0x10, +0x14) on
+queue 4, `page` (+0x18) on 5 and `info` (+0x1C: the top screen's place name and X's prompt,
+`disp_text_detail` and `disp_text_whole` at (300, 220)) on 2, and draws both maps itself. `page`
+holds the loupe `cursor_loupe_g`, drawn at the touch point (`loupeX`, `loupeY`, x clamped to 244),
+the panning arrows `icon_touch_direct`, the dungeon items `item_set_base_g` down the left, the
+floor slider, the place name `btn_place_name_g` (64 to 260 by 200 to 240), A's two buttons
+`btn_expansion_g` and `btn_reduction_g` (262 to 320 by 202 to 240, one shown at a time: A
+switches the loupe and the arrows), Return `btn_return_l` at (0, 202) and the side zones
+`bb_map_area_left` (0 to 64) and `bb_map_area_right` (256 to 320), shaded while the stylus is down
+on the loupe. Queued on the top screen with A's buttons moved 80 to the right and the arrows 40, the
+loupe followed the touch, A's button switched the mode, a drag panned and Return went back to play
+(z3d-mods map5 to map8).
+
 ## HUD visibility
 
 `gCommonData.hudVisibility` (+0x1374C) says how much of the HUD shows, with the N64 game's

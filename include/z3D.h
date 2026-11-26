@@ -771,6 +771,21 @@ typedef struct GearScreen {
 #define GEAR_SCREEN_DRAW_PAGE_CALL 0xB4
 #define GEAR_SCREEN_DRAW_CURSOR_CALL 0xD4
 
+// The Map screen (gUiScreens[UI_SCREEN_MAP], docs/ui.md "Map screen"). MapScreen_Draw queues the
+// touch backdrops on 4, page on 5 and info on 2, and draws the maps itself.
+typedef struct MapScreen {
+    /* 0x000 */ void* vtable;
+    /* 0x004 */ char unk_004[0x14];
+    /* 0x018 */ struct UiLayout* page; // the loupe or the arrows, A's button, the place name, Return
+    /* 0x01C */ struct UiLayout* info; // the top screen's place name and X's prompt
+    /* 0x020 */ char unk_020[0x73C];
+    /* 0x75C */ float loupeX; // the touch point, x clamped to 244
+    /* 0x760 */ float loupeY;
+} MapScreen; // size = 0x764 (at least)
+// MapScreen_Draw's calls of LayoutDrawManager_Draw for page and info, from its start.
+#define MAP_SCREEN_DRAW_PAGE_CALL 0x74
+#define MAP_SCREEN_DRAW_INFO_CALL 0xE8
+
 // The Ocarina screen (gUiScreens[UI_SCREEN_OCARINA], docs/ocarina.md).
 typedef struct OcarinaScreen {
     /* 0x00 */ char unk_00[0x40];
@@ -1108,6 +1123,8 @@ extern ItemScreen gItemsUiScreen; // 0x006F42D8
 extern ItemScreen gMasksUiScreen; // 0x006F660C
 // gUiScreens[UI_SCREEN_GEAR].
 extern GearScreen gGearUiScreen; // 0x006F4130
+// gUiScreens[UI_SCREEN_MAP].
+extern MapScreen gMapUiScreen; // 0x006F45B8
 // Where the GPU driver writes its next PICA command (a value, then its header) and the end of the
 // list it writes into; the game's own register writes (0x146C00, the GL state flush at 0x10BB00) go
 // there too (docs/ui.md "Clipping a layout").

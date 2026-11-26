@@ -83,6 +83,7 @@ vaddr,name
 004affe0,Pictograph_IsOn
 004cf9c4,CutsceneHandler_StartScript
 005475a8,Inventory_IsMapVisible
+00596c20,MapScreen_Draw
 0059a874,MainScreen_UpdateButtons
 0059b27c,MainScreen_Draw
 0059e3e4,ItemScreen_Draw
